@@ -396,6 +396,7 @@ ${context}
         formatted = this.formatTable(formatted);
         
         // 4. 标题（必须在新行开始）
+        formatted = formatted.replace(/^### (.*?)$/gm, '<h5>$1</h5>');
         formatted = formatted.replace(/^### (.*?)$/gm, '<h4>$1</h4>');
         formatted = formatted.replace(/^## (.*?)$/gm, '<h3>$1</h3>');
         formatted = formatted.replace(/^# (.*?)$/gm, '<h2>$1</h2>');
