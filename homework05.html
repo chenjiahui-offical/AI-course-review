@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第五节课作业 - 搜索算法</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="index.html" class="nav-brand">
+                <i class="fas fa-brain"></i>
+                高级人工智能课程复习
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content-card">
+            <div class="homework-header">
+                <h1><i class="fas fa-search"></i> 第五节课作业：搜索算法</h1>
+                <div class="homework-meta">
+                    <span><i class="fas fa-calendar"></i> 第五节课</span>
+                    <span><i class="fas fa-tag"></i> 搜索算法</span>
+                </div>
+            </div>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-question-circle"></i> 作业题目</h2>
+                <div class="question-box">
+                    <p><strong>题目：</strong>给出广度优先搜索、深度优先搜索、回溯法、代价一致搜索四个算法的伪代码。可以从基准算法出发，修改insert()函数，说明每个算法的insert函数的实现差异。</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-code"></i> 基准算法</h2>
+                
+                <div class="intro-box">
+                    <p>所有搜索算法都遵循相同的基准算法框架，唯一的关键差异在于<strong>INSERT函数的实现方式</strong>。</p>
+                </div>
+
+                <div class="code-box">
+                    <pre><code class="language-python">path <- (s0), Fringe <- ϕ;
+
+if(GOAL(s0)==T) then
+    return path=(s0);
+end
+
+INSERT(s0, Fringe);
+
+while T do
+    if empty(Fringe)==T then
+        return failure;
+    end
+    N <- REMOVE(Fringe);
+    s <- STATE(N);
+    update path;
+    foreach s' in succ(s) do
+        if GOAL(s')==T then
+            return(path, s');
+        end
+        INSERT(s', Fringe);
+    end
+end</code></pre>
+                </div>
+
+                <div class="explanation-box">
+                    <h3><i class="fas fa-info-circle"></i> 算法说明</h3>
+                    <ul>
+                        <li><strong>path</strong>：记录从起点到当前节点的路径</li>
+                        <li><strong>Fringe</strong>：待探索节点的集合（边界）</li>
+                        <li><strong>INSERT</strong>：将节点插入Fringe的操作</li>
+                        <li><strong>REMOVE</strong>：从Fringe中取出节点的操作</li>
+                        <li><strong>GOAL</strong>：判断是否到达目标状态</li>
+                        <li><strong>succ(s)</strong>：获取状态s的所有后继状态</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-layer-group"></i> 1. 广度优先搜索（BFS）</h2>
+                
+                <div class="algorithm-header">
+                    <h3><i class="fas fa-lightbulb"></i> 修改要点</h3>
+                    <p>Fringe使用<strong>队列（FIFO）</strong>，INSERT函数实现为<strong>ENQUEUE操作</strong></p>
+                </div>
+
+                <div class="code-box">
+                    <pre><code class="language-python">path <- (s0), Fringe <- ϕ;
+
+if(GOAL(s0)==T) then
+    return path=(s0);
+end
+
+INSERT(s0, Fringe);  // INSERT_BFS: ENQUEUE操作
+
+while T do
+    if empty(Fringe)==T then
+        return failure;
+    end
+    N <- REMOVE(Fringe);  // DEQUEUE操作
+    s <- STATE(N);
+    update path;
+    foreach s' in succ(s) do
+        if GOAL(s')==T then
+            return(path, s');
+        end
+        INSERT(s', Fringe);  // INSERT_BFS: ENQUEUE操作
+    end
+end</code></pre>
+                </div>
+
+                <div class="implementation-box">
+                    <h3><i class="fas fa-cog"></i> INSERT_BFS函数实现</h3>
+                    <div class="code-box">
+                        <pre><code class="language-python">function INSERT_BFS(node, Fringe):
+    // 队列操作：插入到尾部（FIFO）
+    Fringe.append(node);  // 将新节点添加到队列末尾
+end</code></pre>
+                    </div>
+                </div>
+
+                <div class="feature-box">
+                    <h3><i class="fas fa-star"></i> 特点</h3>
+                    <ul>
+                        <li><strong>先进先出</strong>：最先加入的节点最先被探索</li>
+                        <li><strong>层次遍历</strong>：按照距离起点的层次逐层探索</li>
+                        <li><strong>最短路径</strong>：在无权图中保证找到最短路径</li>
+                        <li><strong>空间复杂度高</strong>：需要存储所有同层节点</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-arrow-down"></i> 2. 深度优先搜索（DFS）</h2>
+                
+                <div class="algorithm-header">
+                    <h3><i class="fas fa-lightbulb"></i> 修改要点</h3>
+                    <p>Fringe使用<strong>栈（LIFO）</strong>，INSERT函数实现为<strong>PUSH操作</strong></p>
+                </div>
+
+                <div class="code-box">
+                    <pre><code class="language-python">path <- (s0), Fringe <- ϕ;
+
+if(GOAL(s0)==T) then
+    return path=(s0);
+end
+
+INSERT(s0, Fringe);  // INSERT_DFS: PUSH操作
+
+while T do
+    if empty(Fringe)==T then
+        return failure;
+    end
+    N <- REMOVE(Fringe);  // POP操作
+    s <- STATE(N);
+    update path;
+    foreach s' in succ(s) do
+        if GOAL(s')==T then
+            return(path, s');
+        end
+        INSERT(s', Fringe);  // INSERT_DFS: PUSH操作
+    end
+end</code></pre>
+                </div>
+
+                <div class="implementation-box">
+                    <h3><i class="fas fa-cog"></i> INSERT_DFS函数实现</h3>
+                    <div class="code-box">
+                        <pre><code class="language-python">function INSERT_DFS(node, Fringe):
+    // 栈操作：压入栈顶（LIFO）
+    Fringe.push(node);  // 将新节点压入栈顶
+end</code></pre>
+                    </div>
+                </div>
+
+                <div class="feature-box">
+                    <h3><i class="fas fa-star"></i> 特点</h3>
+                    <ul>
+                        <li><strong>后进先出</strong>：最后加入的节点最先被探索</li>
+                        <li><strong>深度优先</strong>：沿着一条路径尽可能深入探索</li>
+                        <li><strong>空间复杂度低</strong>：只需存储当前路径上的节点</li>
+                        <li><strong>可能陷入死循环</strong>：在有环图中需要记录访问状态</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-undo"></i> 3. 回溯法</h2>
+                
+                <div class="algorithm-header">
+                    <h3><i class="fas fa-lightbulb"></i> 修改要点</h3>
+                    <p>不使用Fringe数据结构，通过<strong>递归调用</strong>实现INSERT功能</p>
+                </div>
+
+                <div class="code-box">
+                    <pre><code class="language-python">path <- (s0), Fringe <- ϕ;
+
+if(GOAL(s0)==T) then
+    return path=(s0);
+end
+
+// 回溯法不需要显式的Fringe操作，直接使用递归
+
+function BACKTRACK(s, path):
+    if GOAL(s)==T then
+        return(path, s);
+    end
+    foreach s' in succ(s) do
+        new_path = path + (s');
+        // INSERT_BACKTRACK: 递归调用
+        result = BACKTRACK(s', new_path);
+        if result != failure then
+            return result;
+        end
+    end
+    return failure;  // 相当于从栈中弹出（回溯）
+end
+
+return BACKTRACK(s0, (s0));</code></pre>
+                </div>
+
+                <div class="implementation-box">
+                    <h3><i class="fas fa-cog"></i> INSERT_BACKTRACK函数实现</h3>
+                    <div class="code-box">
+                        <pre><code class="language-python">function INSERT_BACKTRACK(node, path):
+    // 递归操作：通过函数调用实现"插入"
+    return BACKTRACK(node, path);  // 将节点"插入"到递归调用栈中
+end</code></pre>
+                    </div>
+                </div>
+
+                <div class="feature-box">
+                    <h3><i class="fas fa-star"></i> 特点</h3>
+                    <ul>
+                        <li><strong>递归实现</strong>：利用函数调用栈代替显式的数据结构</li>
+                        <li><strong>自动回溯</strong>：递归返回时自动回到上一层</li>
+                        <li><strong>深度优先</strong>：本质上是DFS的递归实现</li>
+                        <li><strong>代码简洁</strong>：不需要显式管理Fringe</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-dollar-sign"></i> 4. 代价一致搜索（Uniform Cost Search）</h2>
+                
+                <div class="algorithm-header">
+                    <h3><i class="fas fa-lightbulb"></i> 修改要点</h3>
+                    <p>Fringe使用<strong>优先队列</strong>，INSERT函数<strong>按代价排序插入</strong></p>
+                </div>
+
+                <div class="code-box">
+                    <pre><code class="language-python">path <- (s0), Fringe <- ϕ, costs <- ϕ;
+
+if(GOAL(s0)==T) then
+    return path=(s0), cost=0;
+end
+
+INSERT(s0, Fringe), INSERT(0, costs);  // INSERT_UNIFORM: 按代价排序插入
+
+while T do
+    if empty(Fringe)==T then
+        return failure;
+    end
+    N <- REMOVE(Fringe);  // 移除代价最小节点
+    cost <- REMOVE(costs);
+    s <- STATE(N);
+    update path;
+    foreach s' in succ(s) with cost c do
+        new_cost = cost + c;
+        if GOAL(s')==T then
+            return(path, s'), new_cost;
+        end
+        INSERT(s', Fringe), INSERT(new_cost, costs);  // INSERT_UNIFORM: 按new_cost插入
+    end
+end</code></pre>
+                </div>
+
+                <div class="implementation-box">
+                    <h3><i class="fas fa-cog"></i> INSERT_UNIFORM函数实现</h3>
+                    <div class="code-box">
+                        <pre><code class="language-python">function INSERT_UNIFORM(node, Fringe, cost):
+    // 优先队列操作：按代价排序插入
+    Fringe.insert_with_priority(node, cost);  // 按代价大小插入到合适位置
+end</code></pre>
+                    </div>
+                </div>
+
+                <div class="feature-box">
+                    <h3><i class="fas fa-star"></i> 特点</h3>
+                    <ul>
+                        <li><strong>最小代价优先</strong>：总是探索当前代价最小的节点</li>
+                        <li><strong>最优路径</strong>：保证找到代价最小的路径</li>
+                        <li><strong>适用于加权图</strong>：考虑边的权重</li>
+                        <li><strong>类似Dijkstra算法</strong>：是Dijkstra算法的一种实现</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-table"></i> 各算法INSERT函数实现差异总结</h2>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>算法</th>
+                                <th>数据结构</th>
+                                <th>INSERT函数调用方式</th>
+                                <th>实现原理</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>基准算法</strong></td>
+                                <td>通用结构</td>
+                                <td><code>INSERT(s', Fringe)</code></td>
+                                <td>通用插入操作</td>
+                            </tr>
+                            <tr>
+                                <td><strong>BFS</strong></td>
+                                <td>队列(FIFO)</td>
+                                <td><code>INSERT_BFS(s', Fringe)</code></td>
+                                <td>插入队列尾部（先进先出）</td>
+                            </tr>
+                            <tr>
+                                <td><strong>DFS</strong></td>
+                                <td>栈(LIFO)</td>
+                                <td><code>INSERT_DFS(s', Fringe)</code></td>
+                                <td>压入栈顶（后进先出）</td>
+                            </tr>
+                            <tr>
+                                <td><strong>回溯法</strong></td>
+                                <td>递归栈</td>
+                                <td><code>INSERT_BACKTRACK(s', path)</code></td>
+                                <td>递归调用（深度优先）</td>
+                            </tr>
+                            <tr>
+                                <td><strong>代价一致</strong></td>
+                                <td>优先队列</td>
+                                <td><code>INSERT_UNIFORM(s', Fringe, new_cost)</code></td>
+                                <td>按代价排序插入（最小代价优先）</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-chart-bar"></i> 算法对比分析</h2>
+                
+                <div class="comparison-grid">
+                    <div class="comparison-item">
+                        <h3><i class="fas fa-layer-group"></i> BFS</h3>
+                        <div class="pros-cons">
+                            <div class="pros">
+                                <h4>优点</h4>
+                                <ul>
+                                    <li>保证找到最短路径（无权图）</li>
+                                    <li>完备性好</li>
+                                </ul>
+                            </div>
+                            <div class="cons">
+                                <h4>缺点</h4>
+                                <ul>
+                                    <li>空间复杂度高</li>
+                                    <li>需要存储大量节点</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-item">
+                        <h3><i class="fas fa-arrow-down"></i> DFS</h3>
+                        <div class="pros-cons">
+                            <div class="pros">
+                                <h4>优点</h4>
+                                <ul>
+                                    <li>空间复杂度低</li>
+                                    <li>实现简单</li>
+                                </ul>
+                            </div>
+                            <div class="cons">
+                                <h4>缺点</h4>
+                                <ul>
+                                    <li>不保证最短路径</li>
+                                    <li>可能陷入死循环</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-item">
+                        <h3><i class="fas fa-undo"></i> 回溯法</h3>
+                        <div class="pros-cons">
+                            <div class="pros">
+                                <h4>优点</h4>
+                                <ul>
+                                    <li>代码简洁</li>
+                                    <li>自动回溯</li>
+                                </ul>
+                            </div>
+                            <div class="cons">
+                                <h4>缺点</h4>
+                                <ul>
+                                    <li>递归深度限制</li>
+                                    <li>本质上是DFS</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-item">
+                        <h3><i class="fas fa-dollar-sign"></i> 代价一致</h3>
+                        <div class="pros-cons">
+                            <div class="pros">
+                                <h4>优点</h4>
+                                <ul>
+                                    <li>保证最优路径</li>
+                                    <li>适用于加权图</li>
+                                </ul>
+                            </div>
+                            <div class="cons">
+                                <h4>缺点</h4>
+                                <ul>
+                                    <li>时间复杂度较高</li>
+                                    <li>需要维护优先队列</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-check-double"></i> 核心结论</h2>
+                
+                <div class="conclusion-box">
+                    <p>所有搜索算法都遵循相同的基准算法框架，唯一的关键差异在于<strong>INSERT函数的实现方式</strong>。通过修改INSERT函数就能实现不同的搜索策略：</p>
+                    <ul>
+                        <li><strong>BFS</strong>：队列（FIFO）→ 层次遍历</li>
+                        <li><strong>DFS</strong>：栈（LIFO）→ 深度优先</li>
+                        <li><strong>回溯法</strong>：递归栈 → 自动回溯</li>
+                        <li><strong>代价一致</strong>：优先队列 → 最优路径</li>
+                    </ul>
+                    <p class="highlight">这种统一的框架体现了算法设计的优雅性，通过简单的数据结构变化就能实现不同的搜索行为。</p>
+                </div>
+            </section>
+
+            <div class="navigation-buttons">
+                <a href="homework03.html" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 上一个作业
+                </a>
+                <a href="index.html" class="btn-primary">
+                    <i class="fas fa-home"></i> 返回主页
+                </a>
+                <a href="homework07.html" class="btn-secondary">
+                    下一个作业 <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>高级人工智能课程复习网站 © 2024</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>

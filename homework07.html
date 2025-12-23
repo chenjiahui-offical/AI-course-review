@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第七节课作业：神经网络求解SAT问题</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> 返回目录</a>
+        
+        <h1>第七节课作业：基于神经网络的SAT问题求解</h1>
+        
+        <div class="warning-box">
+            <h4><i class="fas fa-tasks"></i> 作业问题</h4>
+            <p>如果用神经网络/机器学习求解SAT问题，该神经网络的输入和输出应该是什么，需要什么训练样本？</p>
+        </div>
+        
+        <h2>问题描述</h2>
+        
+        <p>SAT（布尔可满足性）问题是第一个被证明为NP完全的问题，传统求解方法主要基于回溯搜索和冲突分析。本作业探讨如何使用机器学习和神经网络方法来求解SAT问题，重点分析其输入输出设计和数据集构建。</p>
+        
+        <h2>1. 神经网络输入输出设计</h2>
+        
+        <h3>1.1 输入表示方法</h3>
+        
+        <h4>方法一：矩阵编码表示</h4>
+        <div class="info-box">
+            <p><strong>子句-变量矩阵</strong>：将CNF公式转换为二进制矩阵</p>
+            <ul>
+                <li>矩阵大小：<code>[m × n]</code>，其中m为子句数量，n为变量数量</li>
+                <li>编码规则：
+                    <ul>
+                        <li><code>1</code>：变量正文字出现在子句中</li>
+                        <li><code>-1</code>：变量负文字出现在子句中</li>
+                        <li><code>0</code>：变量不出现在子句中</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="highlight-box">
+            <h4><i class="fas fa-lightbulb"></i> 示例</h4>
+            <p><strong>公式</strong>：$(x_1 \vee \neg x_2 \vee x_3) \wedge (\neg x_1 \vee x_2) \wedge (x_2 \vee \neg x_3)$</p>
+            <p><strong>矩阵表示</strong>：</p>
+            <pre><code>[ 1  -1   1 ]
+[-1   1   0 ]
+[ 0   1  -1 ]</code></pre>
+        </div>
+        
+        <h4>方法二：图结构表示</h4>
+        <ul>
+            <li><strong>二分图</strong>：变量节点和子句节点</li>
+            <li><strong>边连接</strong>：表示变量与子句的包含关系</li>
+            <li><strong>边权重</strong>：区分正负文字（+1/-1）</li>
+        </ul>
+        
+        <h4>方法三：序列化表示</h4>
+        <ul>
+            <li><strong>子句序列</strong>：将每个子句转换为固定长度的向量</li>
+            <li><strong>位置编码</strong>：添加位置信息</li>
+        </ul>
+        
+        <h3>1.2 输出表示方法</h3>
+        
+        <h4>输出类型一：变量赋值预测</h4>
+        <div class="info-box">
+            <ul>
+                <li><strong>输出维度</strong>：<code>[n]</code>，对应n个变量</li>
+                <li><strong>输出值</strong>：每个变量的真值概率（0-1之间）</li>
+                <li><strong>决策规则</strong>：概率>0.5为真，否则为假</li>
+            </ul>
+        </div>
+        
+        <h4>输出类型二：可满足性分类</h4>
+        <div class="info-box">
+            <ul>
+                <li><strong>输出维度</strong>：<code>[1]</code></li>
+                <li><strong>输出值</strong>：公式可满足的概率</li>
+                <li><strong>应用场景</strong>：快速判断SAT/UNSAT</li>
+            </ul>
+        </div>
+        
+        <h4>输出类型三：决策序列</h4>
+        <div class="info-box">
+            <ul>
+                <li><strong>序列长度</strong>：n（变量数量）</li>
+                <li><strong>每步输出</strong>：选择哪个变量进行赋值及其真值</li>
+            </ul>
+        </div>
+        
+        <h2>2. 训练数据集构建</h2>
+        
+        <h3>2.1 数据生成策略</h3>
+        
+        <h4>随机SAT实例生成</h4>
+        <pre><code class="language-python">参数设置：
+- n: 变量数量 (10-1000)
+- m: 子句数量
+- k: 每个子句文字数量 (通常k=3)
+- α = m/n: 子句密度
+
+生成算法：
+1. 随机选择k个不同的变量
+2. 随机决定每个变量的正负
+3. 组合成子句
+4. 重复m次得到CNF公式</code></pre>
+        
+        <h4>难度分级数据集</h4>
+        <table>
+            <tr>
+                <th>区域</th>
+                <th>子句密度 α</th>
+                <th>特点</th>
+            </tr>
+            <tr>
+                <td><strong>简单区域</strong></td>
+                <td>α < 3.5</td>
+                <td>通常可满足</td>
+            </tr>
+            <tr>
+                <td><strong>困难区域</strong></td>
+                <td>α ∈ [4.0, 4.5]</td>
+                <td>相变区域</td>
+            </tr>
+            <tr>
+                <td><strong>稀疏区域</strong></td>
+                <td>α > 5.0</td>
+                <td>通常不可满足</td>
+            </tr>
+        </table>
+        
+        <h3>2.2 标签获取方法</h3>
+        
+        <h4>使用传统SAT求解器</h4>
+        <ul>
+            <li><strong>求解器选择</strong>：MiniSat、Glucose等现有求解器</li>
+            <li><strong>输出标签</strong>：
+                <ul>
+                    <li>变量赋值：满足公式的具体解</li>
+                    <li>可满足性：SAT/UNSAT标签</li>
+                    <li>求解时间：难度指标</li>
+                </ul>
+            </li>
+        </ul>
+        
+        <h4>标签格式</h4>
+        <pre><code class="language-json">{
+  "formula_id": "sat_001",
+  "variables": 50,
+  "clauses": 200,
+  "sat": true,
+  "assignment": [1, 0, 1, 1, 0, ...],
+  "solving_time": 0.025
+}</code></pre>
+        
+        <h3>2.3 数据增强技术</h3>
+        
+        <h4>对称性增强</h4>
+        <ul>
+            <li><strong>变量重命名</strong>：随机排列变量顺序</li>
+            <li><strong>子句重排序</strong>：随机打乱子句顺序</li>
+            <li><strong>符号翻转</strong>：统一翻转变量符号</li>
+        </ul>
+        
+        <h4>噪声增强</h4>
+        <ul>
+            <li><strong>子句删除</strong>：随机删除部分冗余子句</li>
+            <li><strong>子句添加</strong>：添加可推导的冗余子句</li>
+        </ul>
+        
+        <h2>3. 数据集实例示例</h2>
+        
+        <h3>3.1 简单3-SAT实例</h3>
+        <div class="highlight-box">
+            <h4>输入矩阵（3变量，4子句）</h4>
+            <pre><code>[ 1  1 -1]
+[-1  1  0]
+[ 0 -1  1]
+[ 1  0  1]</code></pre>
+            <h4>输出标签</h4>
+            <ul>
+                <li>可满足性：1 (SAT)</li>
+                <li>变量赋值：[1, 1, 0]</li>
+            </ul>
+        </div>
+        
+        <h3>3.2 不可满足实例</h3>
+        <div class="warning-box">
+            <h4>输入矩阵（2变量，4子句）</h4>
+            <pre><code>[ 1  0]
+[ 0  1]
+[-1  0]
+[ 0 -1]</code></pre>
+            <h4>输出标签</h4>
+            <ul>
+                <li>可满足性：0 (UNSAT)</li>
+                <li>变量赋值：[]</li>
+            </ul>
+        </div>
+        
+        <h2>4. 数据集规模建议</h2>
+        
+        <h3>4.1 训练集规模</h3>
+        <table>
+            <tr>
+                <th>规模</th>
+                <th>实例数量</th>
+                <th>变量数</th>
+            </tr>
+            <tr>
+                <td><strong>小规模</strong></td>
+                <td>10万-50万</td>
+                <td>≤50</td>
+            </tr>
+            <tr>
+                <td><strong>中规模</strong></td>
+                <td>100万-500万</td>
+                <td>≤200</td>
+            </tr>
+            <tr>
+                <td><strong>大规模</strong></td>
+                <td>1000万+</td>
+                <td>≤1000</td>
+            </tr>
+        </table>
+        
+        <h3>4.2 测试集分布</h3>
+        <ul>
+            <li><strong>同规模测试</strong>：与训练集相同变量数</li>
+            <li><strong>跨规模测试</strong>：训练50变量，测试100变量</li>
+            <li><strong>跨难度测试</strong>：不同α值的公式</li>
+        </ul>
+        
+        <h2>5. 评估指标</h2>
+        
+        <h3>5.1 分类指标</h3>
+        <ul>
+            <li><strong>可满足性准确率</strong>：SAT/UNSAT分类正确率</li>
+            <li><strong>精确率/召回率</strong>：针对SAT或UNSAT类别</li>
+        </ul>
+        
+        <h3>5.2 赋值指标</h3>
+        <ul>
+            <li><strong>变量赋值准确率</strong>：单个变量预测正确率</li>
+            <li><strong>完全正确率</strong>：所有变量都预测正确的比例</li>
+            <li><strong>汉明距离</strong>：预测赋值与真实赋值的差异</li>
+        </ul>
+        
+        <h2>6. 神经网络架构建议</h2>
+        
+        <h3>6.1 基于CNN的架构</h3>
+        <pre><code class="language-python">class SATSolverCNN(nn.Module):
+    def __init__(self, n_vars, n_clauses):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+        self.fc1 = nn.Linear(64 * n_clauses * n_vars, 256)
+        self.fc2 = nn.Linear(256, n_vars)  # 输出每个变量的赋值
+        
+    def forward(self, x):
+        # x: [batch, 1, n_clauses, n_vars]
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = x.view(x.size(0), -1)
+        x = F.relu(self.fc1(x))
+        x = torch.sigmoid(self.fc2(x))  # 输出概率
+        return x</code></pre>
+        
+        <h3>6.2 基于GNN的架构</h3>
+        <pre><code class="language-python">class SATSolverGNN(nn.Module):
+    def __init__(self, n_vars, hidden_dim=64):
+        super().__init__()
+        self.var_embedding = nn.Embedding(n_vars, hidden_dim)
+        self.gnn_layers = nn.ModuleList([
+            GCNConv(hidden_dim, hidden_dim) for _ in range(3)
+        ])
+        self.output = nn.Linear(hidden_dim, 1)
+        
+    def forward(self, edge_index, edge_attr):
+        # 图神经网络处理变量-子句图
+        x = self.var_embedding.weight
+        for layer in self.gnn_layers:
+            x = F.relu(layer(x, edge_index, edge_attr))
+        return torch.sigmoid(self.output(x))</code></pre>
+        
+        <div class="success-box">
+            <h4><i class="fas fa-check-circle"></i> 总结</h4>
+            <p>使用神经网络求解SAT问题需要精心设计输入输出表示和训练数据集。矩阵编码、图结构等多种输入方式各有优劣，需要根据具体问题选择。通过传统求解器生成大规模标注数据，结合数据增强技术，可以训练出有效的神经网络SAT求解器。</p>
+        </div>
+        
+    </section>
+
+    <div class="navigation-buttons">
+        <a href="homework05.html" class="btn-secondary">
+            <i class="fas fa-arrow-left"></i> 上一个作业
+        </a>
+        <a href="index.html" class="btn-primary">
+            <i class="fas fa-home"></i> 返回主页
+        </a>
+        <a href="homework10.html" class="btn-secondary">
+            下一个作业 <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<footer>
+    <p>高级人工智能课程复习网站 © 2024</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>
+

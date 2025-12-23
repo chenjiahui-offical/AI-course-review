@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>12.04课堂作业 - 多头注意力机制</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="index.html" class="nav-brand">
+                <i class="fas fa-brain"></i>
+                高级人工智能课程复习
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content-card">
+            <div class="homework-header">
+                <h1><i class="fas fa-project-diagram"></i> 12.04课堂作业：多头注意力机制</h1>
+                <div class="homework-meta">
+                    <span><i class="fas fa-calendar"></i> 2024年12月4日</span>
+                    <span><i class="fas fa-tag"></i> Transformer</span>
+                </div>
+            </div>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-question-circle"></i> 作业题目</h2>
+                <div class="question-box">
+                    <p><strong>问题1：</strong>多头注意力的定义和实现</p>
+                    <p><strong>问题2：</strong>多头注意力的引入原因和头功能控制</p>
+                    <p><strong>问题3：</strong>交叉注意力与自注意力的区别</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-layer-group"></i> 问题1：多头注意力的定义和实现</h2>
+                
+                <h3>1.1 多头注意力的头是如何定义的</h3>
+                <div class="definition-box">
+                    <p>多头注意力（Multi-Head Attention）将单一的注意力机制分割为多个"头"，每个头学习不同的表示子空间。</p>
+                    
+                    <h4>输入定义</h4>
+                    <p>给定输入序列 \(X \in \mathbb{R}^{n \times d_{model}}\)，其中：</p>
+                    <ul>
+                        <li>\(n\) 是序列长度</li>
+                        <li>\(d_{model}\) 是模型维度</li>
+                    </ul>
+
+                    <h4>数学定义</h4>
+                    <div class="formula-box">
+                        <p>多头注意力的数学定义为：</p>
+                        <div class="katex-display">
+                            $$\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1, \text{head}_2, ..., \text{head}_h)W^O$$
+                        </div>
+                        <p>其中第 \(i\) 个头的计算为：</p>
+                        <div class="katex-display">
+                            $$\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)$$
+                        </div>
+                        <p>这里：</p>
+                        <ul>
+                            <li>\(h\)：头的数量（通常为8或12）</li>
+                            <li>\(W_i^Q \in \mathbb{R}^{d_{model} \times d_k}\)：第 \(i\) 个头的查询权重矩阵</li>
+                            <li>\(W_i^K \in \mathbb{R}^{d_{model} \times d_k}\)：第 \(i\) 个头的键权重矩阵</li>
+                            <li>\(W_i^V \in \mathbb{R}^{d_{model} \times d_v}\)：第 \(i\) 个头的值权重矩阵</li>
+                            <li>\(W^O \in \mathbb{R}^{h \times d_v \times d_{model}}\)：输出投影矩阵</li>
+                        </ul>
+                        <p>每个头的维度满足：</p>
+                        <div class="katex-display">
+                            $$d_k = d_v = \frac{d_{model}}{h}$$
+                        </div>
+                    </div>
+                </div>
+
+                <h3>1.2 具体实现步骤</h3>
+                <div class="steps-box">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>线性投影</h4>
+                            <div class="katex-display">
+                                $$Q_i = XW_i^Q, \quad K_i = XW_i^K, \quad V_i = XW_i^V$$
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>并行注意力计算</h4>
+                            <div class="katex-display">
+                                $$\text{head}_i = \text{softmax}\left(\frac{Q_iK_i^T}{\sqrt{d_k}}\right)V_i$$
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>拼接与投影</h4>
+                            <div class="katex-display">
+                                $$\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1, ..., \text{head}_h)W^O$$
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>1.3 代码实现</h3>
+                <div class="code-box">
+                    <pre><code class="language-python">import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model, num_heads):
+        super(MultiHeadAttention, self).__init__()
+        assert d_model % num_heads == 0
+        
+        self.d_model = d_model
+        self.num_heads = num_heads
+        self.d_k = d_model // num_heads
+        
+        # 线性投影层
+        self.W_q = nn.Linear(d_model, d_model)
+        self.W_k = nn.Linear(d_model, d_model)
+        self.W_v = nn.Linear(d_model, d_model)
+        self.W_o = nn.Linear(d_model, d_model)
+    
+    def forward(self, Q, K, V, mask=None):
+        batch_size = Q.size(0)
+        
+        # 线性投影并分割成多个头
+        # (batch_size, seq_len, d_model) -> (batch_size, num_heads, seq_len, d_k)
+        Q = self.W_q(Q).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+        K = self.W_k(K).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+        V = self.W_v(V).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+        
+        # 计算注意力分数
+        scores = torch.matmul(Q, K.transpose(-2, -1)) / torch.sqrt(torch.tensor(self.d_k, dtype=torch.float32))
+        
+        if mask is not None:
+            scores = scores.masked_fill(mask == 0, -1e9)
+        
+        # 应用softmax
+        attn_weights = F.softmax(scores, dim=-1)
+        
+        # 加权求和
+        attn_output = torch.matmul(attn_weights, V)
+        
+        # 拼接多个头
+        attn_output = attn_output.transpose(1, 2).contiguous().view(batch_size, -1, self.d_model)
+        
+        # 最终线性投影
+        output = self.W_o(attn_output)
+        
+        return output, attn_weights</code></pre>
+                </div>
+
+                <h3>1.4 两种多头注意力的变体</h3>
+                
+                <h4><i class="fas fa-compress"></i> 变体1：Multi-Query Attention（MQA）</h4>
+                <div class="variant-box">
+                    <p>所有头共享同一组 K 和 V，仅 Q 是多头：</p>
+                    <div class="katex-display">
+                        $$\text{head}_i = \text{Attention}(XW_i^Q, XW^K, XW^V)$$
+                    </div>
+                    <p><strong>优势：</strong>减少内存消耗和计算量，特别是在推理时显著提升效率。</p>
+                </div>
+
+                <h4><i class="fas fa-object-group"></i> 变体2：Grouped Query Attention（GQA）</h4>
+                <div class="variant-box">
+                    <p>将 \(h\) 个头分为 \(g\) 组，每组共享一组 K 和 V：</p>
+                    <div class="katex-display">
+                        $$\text{head}_i = \text{Attention}(XW_i^Q, XW^{\lfloor i/h \rfloor \cdot K}, XW^{\lfloor i/h \rfloor \cdot V})$$
+                    </div>
+                    <p>其中 \(\lfloor i/h \rfloor\) 表示头 \(i\) 所属的组索引。</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-lightbulb"></i> 问题2：多头注意力的引入原因和头功能控制</h2>
+                
+                <h3>2.1 为什么要引入多头注意力</h3>
+                
+                <h4><i class="fas fa-cube"></i> 2.1.1 表示子空间多样化</h4>
+                <div class="reason-box">
+                    <p>单一注意力机制需要在一个空间中建模所有类型的依赖关系，而多头注意力允许：</p>
+                    <ul>
+                        <li><strong>不同头学习不同模式</strong>：如句法依赖、语义关联、长距离依赖等</li>
+                        <li><strong>并行计算多个视角</strong>：类似于CNN中不同卷积核学习不同特征</li>
+                        <li><strong>增强表达能力</strong>：组合多个头的表示可以得到更丰富的特征</li>
+                    </ul>
+                </div>
+
+                <h4><i class="fas fa-calculator"></i> 2.1.2 数学解释</h4>
+                <div class="math-explanation">
+                    <p>假设输入空间的基向量为 \(\{b_1, b_2, ..., b_d\}\)，多头注意力通过不同的投影矩阵：</p>
+                    <div class="katex-display">
+                        $$W_i^Q, W_i^K, W_i^V \text{ 定义不同的子空间 } S_i = \text{span}(W_i^Q, W_i^K, W_i^V)$$
+                    </div>
+                    <p>这样每个头可以在其专门的子空间中学习最优的注意力模式。</p>
+                </div>
+
+                <h4><i class="fas fa-flask"></i> 2.1.3 实验验证</h4>
+                <div class="experiment-box">
+                    <p>研究显示不同头确实学习到不同的语言学现象：</p>
+                    <ul>
+                        <li><strong>头1-2</strong>：主要关注句法结构</li>
+                        <li><strong>头3-4</strong>：处理语义关联</li>
+                        <li><strong>头5-6</strong>：捕捉长距离依赖</li>
+                        <li><strong>头7-8</strong>：处理位置信息</li>
+                    </ul>
+                </div>
+
+                <h3>2.2 如何验证每个头的功能</h3>
+                
+                <h4><i class="fas fa-eye"></i> 2.2.1 可视化分析</h4>
+                <div class="method-box">
+                    <h5>1. 注意力权重可视化</h5>
+                    <div class="katex-display">
+                        $$A_i = \text{softmax}\left(\frac{Q_iK_i^T}{\sqrt{d_k}}\right)$$
+                    </div>
+                    <p>观察 \(A_i\) 的模式，可以发现每个头关注的信息类型。</p>
+
+                    <h5>2. 特征分析</h5>
+                    <ul>
+                        <li>计算每个头输出的相似度矩阵</li>
+                        <li>分析头之间的信息冗余性</li>
+                        <li>使用t-SNE等降维方法可视化头的表示</li>
+                    </ul>
+                </div>
+
+                <h4><i class="fas fa-cut"></i> 2.2.2 消融实验</h4>
+                <div class="method-box">
+                    <h5>1. 单头性能测试</h5>
+                    <div class="katex-display">
+                        $$\text{Performance}_i = f(\text{仅使用head}_i)$$
+                    </div>
+
+                    <h5>2. 头组合测试</h5>
+                    <div class="katex-display">
+                        $$\text{Performance}_{S} = f(\{\text{head}_i | i \in S\})$$
+                    </div>
+
+                    <h5>3. 头重要性排序</h5>
+                    <p>通过逐步移除头来评估每个头的贡献度。</p>
+                </div>
+
+                <h3>2.3 训练中控制头的功能</h3>
+                
+                <h4><i class="fas fa-sliders-h"></i> 2.3.1 正则化方法</h4>
+                <div class="control-method">
+                    <h5>1. 头多样性正则化</h5>
+                    <div class="katex-display">
+                        $$\mathcal{L}_{div} = \sum_{i \neq j} \text{sim}(\text{head}_i, \text{head}_j)$$
+                    </div>
+                    <p>其中 \(\text{sim}(\cdot,\cdot)\) 是相似度函数，最小化该损失可以增加头间的多样性。</p>
+
+                    <h5>2. 头重要性正则化</h5>
+                    <div class="katex-display">
+                        $$\mathcal{L}_{imp} = \sum_{i} \alpha_i \|A_i - A_{target,i}\|^2$$
+                    </div>
+                    <p>其中 \(\alpha_i\) 控制第 \(i\) 个头的重要性。</p>
+                </div>
+
+                <h4><i class="fas fa-sitemap"></i> 2.3.2 结构化控制</h4>
+                <div class="control-method">
+                    <h5>1. 头专门化架构</h5>
+                    <ul>
+                        <li>为不同任务设计专门的头</li>
+                        <li>使用门控机制控制头的激活</li>
+                        <li>引入层次化的头结构</li>
+                    </ul>
+
+                    <h5>2. 动态头选择</h5>
+                    <div class="katex-display">
+                        $$\text{head}_i^{active} = \sigma(g_i(X)) \cdot \text{head}_i$$
+                    </div>
+                    <p>其中 \(g_i(X)\) 是学习到的门控函数，\(\sigma\) 是sigmoid函数。</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-exchange-alt"></i> 问题3：交叉注意力与自注意力的区别</h2>
+                
+                <h3>3.1 交叉注意力的定义</h3>
+                <div class="definition-box">
+                    <p>交叉注意力（Cross-Attention）用于处理来自不同序列的信息，其核心是使用一个序列生成Query，另一个序列生成Key和Value。</p>
+                    
+                    <p>设有两个输入序列：</p>
+                    <ul>
+                        <li>源序列：\(X^{src} \in \mathbb{R}^{n \times d_{model}}\)</li>
+                        <li>目标序列：\(X^{tgt} \in \mathbb{R}^{m \times d_{model}}\)</li>
+                    </ul>
+
+                    <p>交叉注意力的计算为：</p>
+                    <div class="katex-display">
+                        $$\text{CrossAttention}(X^{tgt}, X^{src}, X^{src}) = \text{softmax}\left(\frac{Q^{tgt} (K^{src})^T}{\sqrt{d_k}}\right)V^{src}$$
+                    </div>
+                    <p>其中：</p>
+                    <ul>
+                        <li>\(Q^{tgt} = X^{tgt}W^Q\)：从目标序列生成Query</li>
+                        <li>\(K^{src} = X^{src}W^K\)：从源序列生成Key</li>
+                        <li>\(V^{src} = X^{src}W^V\)：从源序列生成Value</li>
+                    </ul>
+                </div>
+
+                <h3>3.2 QKV矩阵的区别</h3>
+                <div class="comparison-grid">
+                    <div class="comparison-item">
+                        <h4><i class="fas fa-sync"></i> 自注意力（Self-Attention）</h4>
+                        <div class="katex-display">
+                            $$Q = XW^Q, \quad K = XW^K, \quad V = XW^V$$
+                        </div>
+                        <p>所有Q、K、V都来自<strong>同一个输入序列</strong> \(X\)。</p>
+                    </div>
+                    <div class="comparison-item">
+                        <h4><i class="fas fa-exchange-alt"></i> 交叉注意力（Cross-Attention）</h4>
+                        <div class="katex-display">
+                            $$Q = X_{query}W^Q, \quad K = X_{key}W^K, \quad V = X_{value}W^V$$
+                        </div>
+                        <p>Q、K、V来自<strong>不同序列</strong>：</p>
+                        <ul>
+                            <li>Query来自目标序列（或解码器序列）</li>
+                            <li>Key和Value来自源序列（或编码器序列）</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>3.3 应用场景区别</h3>
+                <div class="application-comparison">
+                    <div class="app-item">
+                        <h4><i class="fas fa-sync"></i> 自注意力应用</h4>
+                        <ul>
+                            <li><strong>Encoder端</strong>：理解输入序列内部关系</li>
+                            <li><strong>Decoder端</strong>：理解已生成序列的上下文</li>
+                            <li><strong>自编码任务</strong>：如BERT的MLM任务</li>
+                        </ul>
+                    </div>
+                    <div class="app-item">
+                        <h4><i class="fas fa-exchange-alt"></i> 交叉注意力应用</h4>
+                        <ul>
+                            <li><strong>Encoder-Decoder架构</strong>：如Transformer的解码器</li>
+                            <li><strong>机器翻译</strong>：源语言到目标语言</li>
+                            <li><strong>问答系统</strong>：问题到答案的映射</li>
+                            <li><strong>多模态学习</strong>：文本到图像的对应</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>3.4 计算复杂度比较</h3>
+                <div class="complexity-box">
+                    <h4>自注意力复杂度</h4>
+                    <ul>
+                        <li>时间复杂度：\(O(n^2 \cdot d)\)</li>
+                        <li>空间复杂度：\(O(n^2)\)</li>
+                    </ul>
+
+                    <h4>交叉注意力复杂度</h4>
+                    <ul>
+                        <li>时间复杂度：\(O(n \cdot m \cdot d)\)</li>
+                        <li>空间复杂度：\(O(n \cdot m)\)</li>
+                    </ul>
+                    <p>其中 \(n\) 是query序列长度，\(m\) 是key-value序列长度。</p>
+                </div>
+
+                <h3>3.5 信息流向</h3>
+                <div class="flow-comparison">
+                    <div class="flow-item">
+                        <h4><i class="fas fa-sync"></i> 自注意力</h4>
+                        <ul>
+                            <li>信息在<strong>序列内部</strong>流动</li>
+                            <li>每个位置可以访问序列中的所有其他位置</li>
+                            <li>对称的信息交互</li>
+                        </ul>
+                    </div>
+                    <div class="flow-item">
+                        <h4><i class="fas fa-exchange-alt"></i> 交叉注意力</h4>
+                        <ul>
+                            <li>信息<strong>从源序列流向目标序列</strong></li>
+                            <li>目标序列的每个位置访问源序列的所有位置</li>
+                            <li>非对称的信息检索</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>3.6 代码对比</h3>
+                <div class="code-box">
+                    <pre><code class="language-python"># 自注意力
+self_attn_output = self_attention(X, X, X)
+
+# 交叉注意力
+cross_attn_output = cross_attention(
+    Q=decoder_hidden,  # 来自解码器
+    K=encoder_output,  # 来自编码器
+    V=encoder_output   # 来自编码器
+)</code></pre>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-check-double"></i> 总结</h2>
+                
+                <div class="summary-box">
+                    <h3>关键要点</h3>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <i class="fas fa-1"></i>
+                            <p>多头注意力通过多个子空间学习不同的表示模式</p>
+                        </div>
+                        <div class="summary-item">
+                            <i class="fas fa-2"></i>
+                            <p>不同的头可以捕捉不同类型的依赖关系</p>
+                        </div>
+                        <div class="summary-item">
+                            <i class="fas fa-3"></i>
+                            <p>交叉注意力用于连接不同序列，自注意力用于序列内部建模</p>
+                        </div>
+                        <div class="summary-item">
+                            <i class="fas fa-4"></i>
+                            <p>可以通过正则化和结构化方法控制头的功能</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="navigation-buttons">
+                <a href="homework12-02.html" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 上一个作业
+                </a>
+                <a href="index.html" class="btn-primary">
+                    <i class="fas fa-home"></i> 返回主页
+                </a>
+                <a href="homework12-09.html" class="btn-secondary">
+                    下一个作业 <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>高级人工智能课程复习网站 © 2024</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

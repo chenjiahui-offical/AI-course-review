@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11.18课堂作业 - 线性与非线性分类</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="index.html" class="nav-brand">
+                <i class="fas fa-brain"></i>
+                高级人工智能课程复习
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content-card">
+            <div class="homework-header">
+                <h1><i class="fas fa-chart-line"></i> 11.18课堂作业：线性与非线性分类/回归的几何意义</h1>
+                <div class="homework-meta">
+                    <span><i class="fas fa-calendar"></i> 2024年11月18日</span>
+                    <span><i class="fas fa-tag"></i> 机器学习</span>
+                </div>
+            </div>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-question-circle"></i> 作业题目</h2>
+                <div class="question-box">
+                    <p><strong>题目：</strong>对比分析线性与非线性分类/回归的几何意义，理解不同模型的决策边界特征。</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-image"></i> 几何对比图</h2>
+                <div class="image-box">
+                    <img src="linear_vs_nonlinear_geometric_comparison.png" alt="线性与非线性分类/回归的几何意义对比" style="max-width: 100%; height: auto;">
+                    <p class="image-caption">图：线性与非线性分类/回归的几何意义对比</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-ruler-combined"></i> 一、线性分类（左上图）</h2>
+                
+                <div class="concept-box">
+                    <h3><i class="fas fa-lightbulb"></i> 几何意义</h3>
+                    <ul>
+                        <li>用一条<strong>直线</strong>（或高维超平面）将数据点分成两个类别</li>
+                        <li>决策边界是线性的，可以用线性方程表示：\(w_1x_1 + w_2x_2 + b = 0\)</li>
+                    </ul>
+
+                    <h3><i class="fas fa-star"></i> 特点</h3>
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <i class="fas fa-minus"></i>
+                            <h4>决策边界为直线</h4>
+                            <p>简洁明了</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-palette"></i>
+                            <h4>区域划分</h4>
+                            <p>绿色线条代表分类边界，红色和蓝色区域分别对应两个类别的决策区域</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <h4>适用场景</h4>
+                            <p>适用于线性可分的数据</p>
+                        </div>
+                    </div>
+
+                    <h3><i class="fas fa-calculator"></i> 数学表达</h3>
+                    <div class="formula-box">
+                        <div class="katex-display">
+                            $$f(x) = w_1x_1 + w_2x_2 + b$$
+                        </div>
+                        <p>类别预测：</p>
+                        <div class="katex-display">
+                            $$y = \begin{cases} 
+                            1 & \text{if } f(x) \geq 0 \\
+                            0 & \text{if } f(x) < 0
+                            \end{cases}$$
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-chart-line"></i> 二、线性回归（右上图）</h2>
+                
+                <div class="concept-box">
+                    <h3><i class="fas fa-lightbulb"></i> 几何意义</h3>
+                    <ul>
+                        <li>用一条<strong>直线</strong>拟合连续的目标值</li>
+                        <li>试图最小化预测值与真实值之间的垂直距离（残差）</li>
+                    </ul>
+
+                    <h3><i class="fas fa-star"></i> 特点</h3>
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <i class="fas fa-minus"></i>
+                            <h4>回归线</h4>
+                            <p>绿色直线表示回归线</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-arrows-alt-v"></i>
+                            <h4>残差</h4>
+                            <p>红色虚线表示残差（预测误差）</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-bullseye"></i>
+                            <h4>目标</h4>
+                            <p>找到最佳拟合直线 \(y = ax + b\)</p>
+                        </div>
+                    </div>
+
+                    <h3><i class="fas fa-calculator"></i> 数学表达</h3>
+                    <div class="formula-box">
+                        <div class="katex-display">
+                            $$y = ax + b$$
+                        </div>
+                        <p>目标：最小化均方误差（最小二乘法）</p>
+                        <div class="katex-display">
+                            $$\min \sum_{i=1}^{n}(y_i - \hat{y}_i)^2$$
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-circle"></i> 三、非线性分类（左下图）</h2>
+                
+                <div class="concept-box">
+                    <h3><i class="fas fa-lightbulb"></i> 几何意义</h3>
+                    <ul>
+                        <li>用复杂的<strong>曲线</strong>（如圆形、椭圆等）作为决策边界</li>
+                        <li>能够处理线性不可分的数据分布</li>
+                    </ul>
+
+                    <h3><i class="fas fa-star"></i> 特点</h3>
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <i class="fas fa-circle-notch"></i>
+                            <h4>决策边界为曲线</h4>
+                            <p>绿色圆圈代表分类边界</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-layer-group"></i>
+                            <h4>复杂分布</h4>
+                            <p>能够分离环形分布的数据</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-expand"></i>
+                            <h4>区域划分</h4>
+                            <p>内圆为一个类别，外圆为另一个类别</p>
+                        </div>
+                    </div>
+
+                    <h3><i class="fas fa-calculator"></i> 数学表达</h3>
+                    <div class="formula-box">
+                        <p>圆形决策边界：</p>
+                        <div class="katex-display">
+                            $$f(x) = x_1^2 + x_2^2 - r^2$$
+                        </div>
+                        <p>类别预测：</p>
+                        <div class="katex-display">
+                            $$y = \begin{cases} 
+                            1 & \text{if } f(x) \geq 0 \\
+                            0 & \text{if } f(x) < 0
+                            \end{cases}$$
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-wave-square"></i> 四、非线性回归（右下图）</h2>
+                
+                <div class="concept-box">
+                    <h3><i class="fas fa-lightbulb"></i> 几何意义</h3>
+                    <ul>
+                        <li>用<strong>曲线</strong>（如抛物线）拟合连续的目标值</li>
+                        <li>捕捉数据中的非线性趋势</li>
+                    </ul>
+
+                    <h3><i class="fas fa-star"></i> 特点</h3>
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <i class="fas fa-wave-square"></i>
+                            <h4>回归曲线</h4>
+                            <p>绿色曲线表示非线性回归曲线</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-chart-area"></i>
+                            <h4>拟合能力</h4>
+                            <p>能够拟合具有弯曲趋势的数据</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-superscript"></i>
+                            <h4>多项式</h4>
+                            <p>二次函数 \(y = ax^2 + bx + c\)</p>
+                        </div>
+                    </div>
+
+                    <h3><i class="fas fa-calculator"></i> 数学表达</h3>
+                    <div class="formula-box">
+                        <p>二次多项式回归：</p>
+                        <div class="katex-display">
+                            $$y = ax^2 + bx + c$$
+                        </div>
+                        <p>目标：最小化均方误差</p>
+                        <div class="katex-display">
+                            $$\min \sum_{i=1}^{n}(y_i - \hat{y}_i)^2$$
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-balance-scale"></i> 五、线性与非线性对比总结</h2>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>特征</th>
+                                <th>线性模型</th>
+                                <th>非线性模型</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>决策边界/拟合曲线</strong></td>
+                                <td>直线或超平面</td>
+                                <td>曲线或曲面</td>
+                            </tr>
+                            <tr>
+                                <td><strong>数学形式</strong></td>
+                                <td>线性方程</td>
+                                <td>多项式、指数、对数等</td>
+                            </tr>
+                            <tr>
+                                <td><strong>模型复杂度</strong></td>
+                                <td>简单</td>
+                                <td>复杂</td>
+                            </tr>
+                            <tr>
+                                <td><strong>计算效率</strong></td>
+                                <td>高</td>
+                                <td>相对较低</td>
+                            </tr>
+                            <tr>
+                                <td><strong>可解释性</strong></td>
+                                <td>强</td>
+                                <td>弱</td>
+                            </tr>
+                            <tr>
+                                <td><strong>过拟合风险</strong></td>
+                                <td>低</td>
+                                <td>高</td>
+                            </tr>
+                            <tr>
+                                <td><strong>适用数据</strong></td>
+                                <td>线性可分/线性趋势</td>
+                                <td>复杂分布/非线性趋势</td>
+                            </tr>
+                            <tr>
+                                <td><strong>典型算法</strong></td>
+                                <td>线性回归、逻辑回归、SVM（线性核）</td>
+                                <td>多项式回归、决策树、神经网络、SVM（非线性核）</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="summary-box">
+                    <h3><i class="fas fa-key"></i> 关键要点</h3>
+                    <ul>
+                        <li><strong>线性模型</strong>：简单、高效、可解释性强，但表达能力有限</li>
+                        <li><strong>非线性模型</strong>：表达能力强，能处理复杂数据，但容易过拟合且计算复杂</li>
+                        <li><strong>选择原则</strong>：优先尝试线性模型，如果性能不足再考虑非线性模型</li>
+                        <li><strong>实践建议</strong>：通过交叉验证选择合适的模型复杂度</li>
+                    </ul>
+                </div>
+            </section>
+
+            <div class="navigation-buttons">
+                <a href="homework11-13.html" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 上一个作业
+                </a>
+                <a href="index.html" class="btn-primary">
+                    <i class="fas fa-home"></i> 返回主页
+                </a>
+                <a href="homework11-27.html" class="btn-secondary">
+                    下一个作业 <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>高级人工智能课程复习网站 © 2024</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

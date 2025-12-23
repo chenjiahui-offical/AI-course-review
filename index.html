@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高级人工智能课程复习</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 60px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 18px;
+            margin-bottom: 50px;
+        }
+        
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+        .course-card {
+            background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.1);
+            transform: translateX(-100%);
+            transition: transform 0.3s;
+        }
+        
+        .course-card:hover::before {
+            transform: translateX(0);
+        }
+        
+        .course-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+        
+        .course-number {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        
+        .course-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .course-desc {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 40px 0;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #43a047;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-graduation-cap"></i> 高级人工智能课程</h1>
+        <p class="subtitle">完整课程复习资料 · 按时间顺序整理</p>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number">18</div>
+                <div class="stat-label">作业练习</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">知识覆盖</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">详细</div>
+                <div class="stat-label">知识点讲解</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number"><i class="fas fa-robot"></i></div>
+                <div class="stat-label">AI助手</div>
+            </div>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%); color: white; padding: 20px; border-radius: 15px; margin: 30px 0; text-align: center;">
+            <h3 style="margin-bottom: 10px;"><i class="fas fa-sparkles"></i> 全新AI学习助手</h3>
+            <p style="margin: 0; opacity: 0.9;">点击右下角绿色机器人按钮，获得智能问答和代码解释！支持DeepSeek API</p>
+        </div>
+        
+        <div class="course-grid">
+            <a href="homework01.html" class="course-card">
+                <div class="course-number">作业一</div>
+                <div class="course-title">什么是人工智能</div>
+                <div class="course-desc">智能的本质、AI定义、对抗样本制作方案</div>
+            </a>
+            
+            <a href="homework02.html" class="course-card">
+                <div class="course-number">作业二（课后）</div>
+                <div class="course-title">逻辑推理与归纳学习对比</div>
+                <div class="course-desc">两种AI范式的详细分析、典型例子、应用场景</div>
+            </a>
+            
+            <a href="homework03.html" class="course-card">
+                <div class="course-number">第三节课作业</div>
+                <div class="course-title">优化问题与NFL定理</div>
+                <div class="course-desc">问题vs实例、No Free Lunch定理、算法研发意义</div>
+            </a>
+            
+            <a href="homework05.html" class="course-card">
+                <div class="course-number">第五节课作业</div>
+                <div class="course-title">搜索算法</div>
+                <div class="course-desc">BFS、DFS、回溯法、代价一致搜索的INSERT函数差异</div>
+            </a>
+            
+            <a href="homework07.html" class="course-card">
+                <div class="course-number">第七节课作业</div>
+                <div class="course-title">神经网络求解SAT问题</div>
+                <div class="course-desc">输入输出设计、训练数据集构建、网络架构</div>
+            </a>
+            
+            <a href="homework10.html" class="course-card">
+                <div class="course-number">第十节课作业</div>
+                <div class="course-title">不完美信息博弈</div>
+                <div class="course-desc">扑克、桥牌、纳什均衡、强化学习求解方法</div>
+            </a>
+            
+            <a href="homework10-30.html" class="course-card">
+                <div class="course-number">10.30课堂作业</div>
+                <div class="course-title">强化学习折扣因子</div>
+                <div class="course-desc">折扣因子的作用、递推方程修正、收敛性分析</div>
+            </a>
+            
+            <a href="homework11-04-td.html" class="course-card">
+                <div class="course-number">11.04课堂作业</div>
+                <div class="course-title">时序差分学习(TD)</div>
+                <div class="course-desc">TD(0)、SARSA、Q-Learning、Expected SARSA、TD(λ)</div>
+            </a>
+            
+            <a href="homework11-04-ac.html" class="course-card">
+                <div class="course-number">11.04课后作业</div>
+                <div class="course-title">Actor-Critic算法改进</div>
+                <div class="course-desc">A2C/A3C、DDPG、SAC、PPO详细对比</div>
+            </a>
+            
+            <a href="homework11-06-dqn.html" class="course-card">
+                <div class="course-number">11.06课堂作业</div>
+                <div class="course-title">Double DQN算法</div>
+                <div class="course-desc">解决Q值高估偏差、算法架构、伪代码</div>
+            </a>
+            
+            <a href="homework11-06-ppo.html" class="course-card">
+                <div class="course-number">11.06课堂作业2</div>
+                <div class="course-title">PPO算法详细步骤</div>
+                <div class="course-desc">完整训练流程、GAE优势函数、七个阶段详解</div>
+            </a>
+            
+            <a href="homework11-11.html" class="course-card">
+                <div class="course-number">11.11课堂作业</div>
+                <div class="course-title">机器学习技术</div>
+                <div class="course-desc">大模型标签生成、数据增强、伪标签技术</div>
+            </a>
+            
+            <a href="homework11-13.html" class="course-card">
+                <div class="course-number">11.13课堂作业</div>
+                <div class="course-title">数据集划分</div>
+                <div class="course-desc">训练集、验证集、测试集的作用和示例</div>
+            </a>
+            
+            <a href="homework11-18.html" class="course-card">
+                <div class="course-number">11.18课堂作业</div>
+                <div class="course-title">线性与非线性分类</div>
+                <div class="course-desc">几何意义对比、决策边界、可视化分析</div>
+            </a>
+            
+            <a href="homework11-27.html" class="course-card">
+                <div class="course-number">11.27课堂作业</div>
+                <div class="course-title">显存优化与混合精度</div>
+                <div class="course-desc">batch_size影响、降低精度问题、解决方案</div>
+            </a>
+            
+            <a href="homework12-02.html" class="course-card">
+                <div class="course-number">12.02课堂作业</div>
+                <div class="course-title">残差连接</div>
+                <div class="course-desc">ResNet、梯度消失、网络退化问题</div>
+            </a>
+            
+            <a href="homework12-04.html" class="course-card">
+                <div class="course-number">12.04课堂作业</div>
+                <div class="course-title">多头注意力机制</div>
+                <div class="course-desc">Multi-Head Attention、交叉注意力、QKV矩阵</div>
+            </a>
+            
+            <a href="homework12-09.html" class="course-card">
+                <div class="course-number">12.09课堂作业</div>
+                <div class="course-title">贝叶斯网络</div>
+                <div class="course-desc">联合概率密度、条件独立性、计算公式</div>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

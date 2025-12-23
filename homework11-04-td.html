@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11.04课堂作业 - 时序差分学习(TD)</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="index.html" class="nav-brand">
+                <i class="fas fa-brain"></i>
+                高级人工智能课程复习
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content-card">
+            <div class="homework-header">
+                <h1><i class="fas fa-clock"></i> 11.04课堂作业：时序差分学习(TD)</h1>
+                <div class="homework-meta">
+                    <span><i class="fas fa-calendar"></i> 2024年11月4日</span>
+                    <span><i class="fas fa-tag"></i> 强化学习</span>
+                </div>
+            </div>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-question-circle"></i> 作业题目</h2>
+                <div class="question-box">
+                    <p><strong>题目：</strong>详细阐述时序差分学习（Temporal Difference Learning）的基本思想、五种典型TD算法及其对比分析。</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-lightbulb"></i> 1. TD学习的基本思想</h2>
+                
+                <h3>1.1 核心目标</h3>
+                <p>时序差分学习的核心目标是在<strong>不知道完整环境模型</strong>的情况下，直接从经验中学习状态价值函数或动作价值函数。它结合了动态规划和蒙特卡洛方法的优点，能够在每一步学习后立即更新价值估计，无需等待整个回合结束。</p>
+
+                <h3>1.2 基本思想</h3>
+                <p>TD学习的基本思想是利用当前估计的后续状态价值来更新当前状态的价值，即使用"时序差分"（Temporal Difference）来指导学习。这种方法通过比较当前的价值预测与更好的预测（包括后续的奖励和下一状态的价值）来调整价值函数。</p>
+
+                <h3>1.3 基本更新公式</h3>
+                <div class="formula-box">
+                    <p>TD学习的基本更新公式为：</p>
+                    <div class="katex-display">
+                        $$V(S_t) \leftarrow V(S_t) + \alpha \left[ R_{t+1} + \gamma V(S_{t+1}) - V(S_t) \right]$$
+                    </div>
+                    <p>其中：</p>
+                    <ul>
+                        <li>\(V(S_t)\)：状态\(S_t\)的当前价值估计</li>
+                        <li>\(\alpha\)：学习率</li>
+                        <li>\(R_{t+1}\)：在状态\(S_t\)采取动作后获得的即时奖励</li>
+                        <li>\(\gamma\)：折扣因子</li>
+                        <li>\(S_{t+1}\)：下一个状态</li>
+                        <li>\(\delta_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t)\)：TD误差</li>
+                    </ul>
+                </div>
+
+                <h3>1.4 核心要素</h3>
+                <div class="info-box">
+                    <ul>
+                        <li><strong>自举（Bootstrapping）</strong>：利用当前估计来更新估计</li>
+                        <li><strong>增量学习</strong>：每步都进行更新，无需等待回合结束</li>
+                        <li><strong>在线学习</strong>：可以直接从与环境交互的经验中学习</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-list-ol"></i> 2. 五种典型的TD学习算法</h2>
+
+                <h3>2.1 TD(0) 算法</h3>
+                <div class="algorithm-box">
+                    <p><strong>基本思想：</strong>最简单的TD算法，每次只向前看一步</p>
+                    <p><strong>更新公式：</strong></p>
+                    <div class="katex-display">
+                        $$V(S_t) \leftarrow V(S_t) + \alpha \left[ R_{t+1} + \gamma V(S_{t+1}) - V(S_t) \right]$$
+                    </div>
+                    <p><strong>特点：</strong>使用下一状态的价值来更新当前状态</p>
+                </div>
+
+                <h3>2.2 SARSA 算法</h3>
+                <div class="algorithm-box">
+                    <p><strong>基本思想：</strong>State-Action-Reward-State-Action，学习动作价值函数Q(s,a)</p>
+                    <p><strong>更新公式：</strong></p>
+                    <div class="katex-display">
+                        $$Q(S_t,A_t) \leftarrow Q(S_t,A_t) + \alpha \left[ R_{t+1} + \gamma Q(S_{t+1},A_{t+1}) - Q(S_t,A_t) \right]$$
+                    </div>
+                    <p><strong>特点：</strong>考虑下一个动作，适用于在线学习策略</p>
+                </div>
+
+                <h3>2.3 Q-Learning 算法</h3>
+                <div class="algorithm-box">
+                    <p><strong>基本思想：</strong>离策略TD控制算法，学习最优动作价值函数</p>
+                    <p><strong>更新公式：</strong></p>
+                    <div class="katex-display">
+                        $$Q(S_t,A_t) \leftarrow Q(S_t,A_t) + \alpha \left[ R_{t+1} + \gamma \max_a Q(S_{t+1},a) - Q(S_t,A_t) \right]$$
+                    </div>
+                    <p><strong>特点：</strong>使用最大Q值，可以学习最优策略</p>
+                </div>
+
+                <h3>2.4 Expected SARSA 算法</h3>
+                <div class="algorithm-box">
+                    <p><strong>基本思想：</strong>SARSA的改进版本，使用期望值代替实际采样值</p>
+                    <p><strong>更新公式：</strong></p>
+                    <div class="katex-display">
+                        $$Q(S_t,A_t) \leftarrow Q(S_t,A_t) + \alpha \left[ R_{t+1} + \gamma \sum_a \pi(a|S_{t+1})Q(S_{t+1},a) - Q(S_t,A_t) \right]$$
+                    </div>
+                    <p><strong>特点：</strong>减少方差，提高稳定性</p>
+                </div>
+
+                <h3>2.5 TD(λ) 算法</h3>
+                <div class="algorithm-box">
+                    <p><strong>基本思想：</strong>结合TD和蒙特卡洛方法，使用资格迹（eligibility traces）</p>
+                    <p><strong>更新公式：</strong></p>
+                    <div class="katex-display">
+                        $$\delta_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t)$$
+                        $$V(S_t) \leftarrow V(S_t) + \alpha \delta_t E_t(s)$$
+                        $$E_t(s) = \gamma \lambda E_{t-1}(s) + \mathbb{1}_{(s=S_t)}$$
+                    </div>
+                    <p><strong>特点：</strong>向前看多步，平衡偏差和方差</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-chart-bar"></i> 3. 算法对比分析</h2>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>算法</th>
+                                <th>策略类型</th>
+                                <th>更新目标</th>
+                                <th>学习对象</th>
+                                <th>主要优势</th>
+                                <th>主要劣势</th>
+                                <th>适用场景</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>TD(0)</strong></td>
+                                <td>同策略</td>
+                                <td>V(s)</td>
+                                <td>状态价值</td>
+                                <td>简单直接，计算高效</td>
+                                <td>无法直接用于控制</td>
+                                <td>策略评估</td>
+                            </tr>
+                            <tr>
+                                <td><strong>SARSA</strong></td>
+                                <td>同策略</td>
+                                <td>Q(s,a)</td>
+                                <td>动作价值</td>
+                                <td>安全，考虑探索策略</td>
+                                <td>受探索策略影响</td>
+                                <td>需要安全探索的连续控制</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Q-Learning</strong></td>
+                                <td>异策略</td>
+                                <td>Q(s,a)</td>
+                                <td>动作价值</td>
+                                <td>可学习最优策略</td>
+                                <td>训练不稳定，容易高估</td>
+                                <td>离散动作空间的最优控制</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Expected SARSA</strong></td>
+                                <td>同/异策略</td>
+                                <td>Q(s,a)</td>
+                                <td>动作价值</td>
+                                <td>稳定性高，方差小</td>
+                                <td>计算复杂度较高</td>
+                                <td>需要稳定性的复杂环境</td>
+                            </tr>
+                            <tr>
+                                <td><strong>TD(λ)</strong></td>
+                                <td>同策略</td>
+                                <td>V(s)</td>
+                                <td>状态价值</td>
+                                <td>平衡偏差方差，效率高</td>
+                                <td>参数调优复杂</td>
+                                <td>长序列奖励任务</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>关键差异总结</h3>
+                <div class="comparison-grid">
+                    <div class="comparison-item">
+                        <h4><i class="fas fa-exchange-alt"></i> 策略类型</h4>
+                        <p>Q-Learning是唯一纯异策略算法，可以学习不同于执行策略的最优策略</p>
+                    </div>
+                    <div class="comparison-item">
+                        <h4><i class="fas fa-sync"></i> 更新机制</h4>
+                        <p>TD(0)使用一步更新，TD(λ)使用多步更新，其他使用单步Q值更新</p>
+                    </div>
+                    <div class="comparison-item">
+                        <h4><i class="fas fa-shield-alt"></i> 稳定性</h4>
+                        <p>Expected SARSA > TD(0) ≈ SARSA > Q-Learning</p>
+                    </div>
+                    <div class="comparison-item">
+                        <h4><i class="fas fa-tachometer-alt"></i> 样本效率</h4>
+                        <p>TD(λ) > Expected SARSA ≈ SARSA > Q-Learning > TD(0)</p>
+                    </div>
+                    <div class="comparison-item">
+                        <h4><i class="fas fa-check-circle"></i> 适用性</h4>
+                        <p>TD(0)主要用于评估，其他主要用于控制</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="navigation-buttons">
+                <a href="homework10-30.html" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 上一个作业
+                </a>
+                <a href="index.html" class="btn-primary">
+                    <i class="fas fa-home"></i> 返回主页
+                </a>
+                <a href="homework11-04-ac.html" class="btn-secondary">
+                    下一个作业 <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>高级人工智能课程复习网站 © 2024</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

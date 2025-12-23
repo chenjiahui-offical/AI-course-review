@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11.06课堂作业2 - PPO算法详细步骤</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="index.html" class="nav-brand">
+                <i class="fas fa-brain"></i>
+                高级人工智能课程复习
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content-card">
+            <div class="homework-header">
+                <h1><i class="fas fa-cogs"></i> 11.06课堂作业2：PPO算法详细步骤</h1>
+                <div class="homework-meta">
+                    <span><i class="fas fa-calendar"></i> 2024年11月6日</span>
+                    <span><i class="fas fa-tag"></i> 策略优化</span>
+                </div>
+            </div>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-question-circle"></i> 作业题目</h2>
+                <div class="question-box">
+                    <p><strong>题目：</strong>详细阐述PPO（Proximal Policy Optimization）算法的完整实现步骤，包括初始化、数据收集、优势函数计算、网络优化等各个阶段。</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-info-circle"></i> PPO算法概述</h2>
+                <div class="overview-box">
+                    <p>PPO是一种<strong>近端策略优化算法</strong>，属于策略梯度方法的一种改进版本。它通过限制每次策略更新的幅度来平衡探索与利用，提高训练的稳定性。</p>
+                    <div class="key-features">
+                        <div class="feature-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <h4>稳定性</h4>
+                            <p>限制策略更新幅度</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-balance-scale"></i>
+                            <h4>平衡性</h4>
+                            <p>探索与利用的权衡</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-rocket"></i>
+                            <h4>高效性</h4>
+                            <p>样本复用提高效率</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-play-circle"></i> 第一阶段：初始化设置</h2>
+                
+                <h3>1.1 网络架构初始化</h3>
+                <div class="network-grid">
+                    <div class="network-item">
+                        <h4><i class="fas fa-brain"></i> 策略网络 π<sub>θ</sub>(a|s)</h4>
+                        <ul>
+                            <li><strong>输入：</strong>状态s（可以是图像、向量等）</li>
+                            <li><strong>输出：</strong>动作概率分布（离散动作）或动作均值和方差（连续动作）</li>
+                            <li><strong>网络结构：</strong>通常使用MLP或CNN，包含输入层、隐藏层、输出层</li>
+                            <li><strong>激活函数：</strong>隐藏层使用ReLU或tanh，输出层根据任务选择</li>
+                        </ul>
+                    </div>
+                    <div class="network-item">
+                        <h4><i class="fas fa-chart-line"></i> 价值网络 V<sub>φ</sub>(s)</h4>
+                        <ul>
+                            <li><strong>输入：</strong>状态s</li>
+                            <li><strong>输出：</strong>状态价值标量</li>
+                            <li><strong>网络结构：</strong>可与策略网络共享特征提取层</li>
+                            <li><strong>激活函数：</strong>隐藏层使用ReLU，输出层通常不使用激活函数</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>1.2 超参数设置</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>参数名称</th>
+                                <th>符号</th>
+                                <th>典型值</th>
+                                <th>作用说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>裁剪参数</td>
+                                <td>ε</td>
+                                <td>0.1-0.2</td>
+                                <td>控制策略更新幅度</td>
+                            </tr>
+                            <tr>
+                                <td>学习率</td>
+                                <td>α</td>
+                                <td>1e-4到3e-4</td>
+                                <td>梯度下降步长</td>
+                            </tr>
+                            <tr>
+                                <td>折扣因子</td>
+                                <td>γ</td>
+                                <td>0.99-0.999</td>
+                                <td>权衡即时奖励和长期奖励</td>
+                            </tr>
+                            <tr>
+                                <td>GAE参数</td>
+                                <td>λ</td>
+                                <td>0.9-0.95</td>
+                                <td>偏差-方差权衡</td>
+                            </tr>
+                            <tr>
+                                <td>批次大小</td>
+                                <td>T</td>
+                                <td>2048-8192</td>
+                                <td>每次收集的数据量</td>
+                            </tr>
+                            <tr>
+                                <td>更新轮数</td>
+                                <td>K</td>
+                                <td>3-10</td>
+                                <td>同一批数据的更新次数</td>
+                            </tr>
+                            <tr>
+                                <td>熵系数</td>
+                                <td>c₂</td>
+                                <td>0.01-0.1</td>
+                                <td>鼓励探索</td>
+                            </tr>
+                            <tr>
+                                <td>价值函数系数</td>
+                                <td>c₁</td>
+                                <td>0.5-1.0</td>
+                                <td>价值损失权重</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-database"></i> 第二阶段：数据收集过程</h2>
+                
+                <h3>2.1 环境交互</h3>
+                <div class="code-box">
+                    <pre><code class="language-python">state = env.reset()
+done = False
+episode_reward = 0
+
+while not done and collected_steps < T:
+    # 使用策略网络选择动作
+    action_probs = policy_network(state)
+    action = sample_from_distribution(action_probs)
+    log_prob = log_probability(action, action_probs)
+    
+    # 执行动作
+    next_state, reward, done, info = env.step(action)
+    
+    # 存储数据
+    states.append(state)
+    actions.append(action)
+    rewards.append(reward)
+    log_probs.append(log_prob)
+    dones.append(done)
+    values.append(value_network(state))
+    
+    state = next_state
+    episode_reward += reward
+    collected_steps += 1</code></pre>
+                </div>
+
+                <h3>2.2 数据预处理</h3>
+                <div class="preprocessing-steps">
+                    <div class="prep-step">
+                        <h4><i class="fas fa-1"></i> 数据格式转换</h4>
+                        <ul>
+                            <li>将列表转换为numpy数组或torch张量</li>
+                            <li>确保数据类型和设备一致性</li>
+                        </ul>
+                    </div>
+                    <div class="prep-step">
+                        <h4><i class="fas fa-2"></i> 数据归一化（可选）</h4>
+                        <ul>
+                            <li>状态归一化：计算均值和方差，标准化输入</li>
+                            <li>奖励归一化：计算均值和方差，标准化奖励</li>
+                            <li>优势函数归一化：零均值单位方差</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-calculator"></i> 第三阶段：优势函数计算</h2>
+                
+                <h3>3.1 计算时间差分误差</h3>
+                <div class="formula-box">
+                    <p>使用当前价值网络计算TD误差：</p>
+                    <div class="code-box">
+                        <pre><code class="language-python">for t in range(T):
+    if not done[t]:
+        bootstrap_value = value_network(states[t+1])
+    else:
+        bootstrap_value = 0
+    
+    delta[t] = rewards[t] + gamma * bootstrap_value * (1 - done[t]) - values[t]</code></pre>
+                    </div>
+                </div>
+
+                <h3>3.2 计算GAE优势函数</h3>
+                <div class="formula-box">
+                    <p>使用GAE（Generalized Advantage Estimation）计算优势函数，平衡偏差和方差：</p>
+                    <div class="katex-display">
+                        $$A_t^{GAE} = \sum_{l=0}^{\infty} (\gamma\lambda)^l \delta_{t+l}$$
+                    </div>
+                    <div class="code-box">
+                        <pre><code class="language-python">advantage[T-1] = delta[T-1]
+for t in reversed(range(T-1)):
+    if not done[t]:
+        advantage[t] = delta[t] + gamma * lambda * advantage[t+1] * (1 - done[t])
+    else:
+        advantage[t] = delta[t]</code></pre>
+                    </div>
+                </div>
+
+                <h3>3.3 计算目标价值</h3>
+                <div class="formula-box">
+                    <p>计算用于价值函数训练的目标值：</p>
+                    <div class="katex-display">
+                        $$\text{returns} = \text{advantages} + \text{values}$$
+                    </div>
+                    <div class="code-box">
+                        <pre><code class="language-python">returns = advantages + values</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-sync-alt"></i> 第四阶段：网络优化过程</h2>
+                
+                <h3>4.1 数据批处理</h3>
+                <div class="code-box">
+                    <pre><code class="language-python">batch_size = T // num_mini_batches
+indices = random.permutation(T)
+
+for i in range(num_mini_batches):
+    start_idx = i * batch_size
+    end_idx = (i + 1) * batch_size
+    batch_indices = indices[start_idx:end_idx]
+    
+    batch_states = states[batch_indices]
+    batch_actions = actions[batch_indices]
+    batch_old_log_probs = old_log_probs[batch_indices]
+    batch_advantages = advantages[batch_indices]
+    batch_returns = returns[batch_indices]</code></pre>
+                </div>
+
+                <h3>4.2 前向传播计算</h3>
+                <div class="forward-steps">
+                    <div class="forward-step">
+                        <h4>策略网络前向传播</h4>
+                        <div class="code-box">
+                            <pre><code class="language-python">action_dists = policy_network(batch_states)
+batch_new_log_probs = action_dists.log_prob(batch_actions)
+entropy = action_dists.entropy().mean()</code></pre>
+                        </div>
+                    </div>
+                    <div class="forward-step">
+                        <h4>价值网络前向传播</h4>
+                        <div class="code-box">
+                            <pre><code class="language-python">batch_new_values = value_network(batch_states)</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>4.3 计算重要性采样比率</h3>
+                <div class="formula-box">
+                    <div class="katex-display">
+                        $$r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)} = \exp(\log\pi_\theta(a_t|s_t) - \log\pi_{\theta_{old}}(a_t|s_t))$$
+                    </div>
+                    <div class="code-box">
+                        <pre><code class="language-python">ratio = torch.exp(batch_new_log_probs - batch_old_log_probs)</code></pre>
+                    </div>
+                </div>
+
+                <h3>4.4 计算各项损失函数</h3>
+                <div class="loss-grid">
+                    <div class="loss-item">
+                        <h4><i class="fas fa-chart-line"></i> 策略损失（裁剪项）</h4>
+                        <div class="katex-display">
+                            $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t\left[\min\left(r_t(\theta)\hat{A}_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t\right)\right]$$
+                        </div>
+                        <div class="code-box">
+                            <pre><code class="language-python">surr1 = ratio * batch_advantages
+surr2 = torch.clamp(ratio, 1 - epsilon, 1 + epsilon) * batch_advantages
+policy_loss = -torch.min(surr1, surr2).mean()</code></pre>
+                        </div>
+                    </div>
+                    <div class="loss-item">
+                        <h4><i class="fas fa-bullseye"></i> 价值函数损失</h4>
+                        <div class="katex-display">
+                            $$L^{VF} = \frac{1}{N}\sum_i (V_\phi(s_i) - \text{returns}_i)^2$$
+                        </div>
+                        <div class="code-box">
+                            <pre><code class="language-python">value_loss = F.mse_loss(batch_new_values, batch_returns)</code></pre>
+                        </div>
+                    </div>
+                    <div class="loss-item">
+                        <h4><i class="fas fa-random"></i> 熵损失</h4>
+                        <div class="katex-display">
+                            $$L^{ENT} = -\mathbb{E}[H(\pi)]$$
+                        </div>
+                        <div class="code-box">
+                            <pre><code class="language-python">entropy_loss = -entropy</code></pre>
+                        </div>
+                    </div>
+                    <div class="loss-item highlight">
+                        <h4><i class="fas fa-calculator"></i> 总损失</h4>
+                        <div class="katex-display">
+                            $$L^{TOTAL} = L^{CLIP} + c_1 L^{VF} + c_2 L^{ENT}$$
+                        </div>
+                        <div class="code-box">
+                            <pre><code class="language-python">total_loss = policy_loss + c1 * value_loss + c2 * entropy_loss</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>4.5 反向传播和参数更新</h3>
+                <div class="code-box">
+                    <pre><code class="language-python">optimizer.zero_grad()
+total_loss.backward()
+torch.nn.utils.clip_grad_norm_(policy_network.parameters(), max_grad_norm)
+torch.nn.utils.clip_grad_norm_(value_network.parameters(), max_grad_norm)
+optimizer.step()</code></pre>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-redo-alt"></i> 第五阶段：重复更新过程</h2>
+                
+                <h3>5.1 多轮更新</h3>
+                <div class="info-box">
+                    <p>在同一批数据上进行K轮更新，提高样本效率：</p>
+                    <div class="code-box">
+                        <pre><code class="language-python">for epoch in range(K):
+    for mini_batch in mini_batches:
+        # 执行步骤4.2-4.5的所有计算
+        # 前向传播 → 计算比率 → 计算损失 → 反向传播
+        pass</code></pre>
+                    </div>
+                </div>
+
+                <h3>5.2 策略更新约束（PPO-Penalty变体）</h3>
+                <div class="variant-box">
+                    <p>如果使用KL散度惩罚版本：</p>
+                    <div class="code-box">
+                        <pre><code class="language-python"># 计算当前策略和旧策略的KL散度
+kl_divergence = (old_action_probs * (old_action_probs.log() - new_action_probs.log())).sum(-1)
+kl_mean = kl_divergence.mean()
+
+# 动态调整惩罚系数
+if kl_mean < target_kl / 1.5:
+    beta *= 2
+elif kl_mean > target_kl * 1.5:
+    beta /= 2
+
+# 修改损失函数
+policy_loss = -(ratio * advantages - beta * kl_divergence).mean()</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-chart-bar"></i> 第六阶段：训练监控和调整</h2>
+                
+                <h3>6.1 性能指标监控</h3>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <i class="fas fa-trophy"></i>
+                        <h4>平均奖励</h4>
+                        <p>最近N个episode的平均奖励</p>
+                    </div>
+                    <div class="metric-item">
+                        <i class="fas fa-chart-line"></i>
+                        <h4>策略损失</h4>
+                        <p>policy_loss的值</p>
+                    </div>
+                    <div class="metric-item">
+                        <i class="fas fa-bullseye"></i>
+                        <h4>价值损失</h4>
+                        <p>value_loss的值</p>
+                    </div>
+                    <div class="metric-item">
+                        <i class="fas fa-random"></i>
+                        <h4>熵损失</h4>
+                        <p>entropy_loss的值</p>
+                    </div>
+                    <div class="metric-item">
+                        <i class="fas fa-arrow-up"></i>
+                        <h4>梯度范数</h4>
+                        <p>参数梯度的L2范数</p>
+                    </div>
+                    <div class="metric-item">
+                        <i class="fas fa-exchange-alt"></i>
+                        <h4>KL散度</h4>
+                        <p>策略更新前后的KL散度</p>
+                    </div>
+                    <div class="metric-item">
+                        <i class="fas fa-cut"></i>
+                        <h4>裁剪比例</h4>
+                        <p>被裁剪的样本比例</p>
+                    </div>
+                </div>
+
+                <h3>6.2 学习率调度</h3>
+                <div class="code-box">
+                    <pre><code class="language-python"># 线性衰减学习率
+def linear_schedule(initial_lr, final_lr, total_timesteps):
+    def schedule(progress):
+        return final_lr + (initial_lr - final_lr) * max(0, 1 - progress)
+    return schedule</code></pre>
+                </div>
+
+                <h3>6.3 早停策略</h3>
+                <div class="info-box">
+                    <ul>
+                        <li>如果平均奖励在连续M轮中没有提升，降低学习率</li>
+                        <li>如果性能持续下降，回滚到之前的最佳模型</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-flag-checkered"></i> 第七阶段：训练完成和评估</h2>
+                
+                <h3>7.1 模型保存</h3>
+                <div class="code-box">
+                    <pre><code class="language-python">torch.save({
+    'policy_state_dict': policy_network.state_dict(),
+    'value_state_dict': value_network.state_dict(),
+    'optimizer_state_dict': optimizer.state_dict(),
+    'training_stats': training_stats
+}, 'best_model.pth')</code></pre>
+                </div>
+
+                <h3>7.2 最终评估</h3>
+                <div class="code-box">
+                    <pre><code class="language-python">def evaluate_model(model, env, num_episodes=100):
+    total_rewards = []
+    for episode in range(num_episodes):
+        state = env.reset()
+        done = False
+        episode_reward = 0
+        
+        while not done:
+            action = model.get_greedy_action(state)
+            state, reward, done, _ = env.step(action)
+            episode_reward += reward
+        
+        total_rewards.append(episode_reward)
+    
+    return np.mean(total_rewards), np.std(total_rewards)</code></pre>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-code"></i> PPO算法完整伪代码</h2>
+                
+                <div class="pseudocode-box">
+                    <pre><code class="language-python">def PPO_algorithm():
+    # 初始化
+    policy_network = PolicyNetwork()
+    value_network = ValueNetwork()
+    optimizer = Adam(list(policy_network.parameters()) + list(value_network.parameters()))
+    
+    for iteration in range(max_iterations):
+        # 数据收集阶段
+        states, actions, rewards, log_probs, values, dones = [], [], [], [], [], []
+        state = env.reset()
+        
+        for t in range(batch_size):
+            # 策略执行
+            action_dist = policy_network(state)
+            action = action_dist.sample()
+            log_prob = action_dist.log_prob(action)
+            value = value_network(state)
+            
+            # 环境交互
+            next_state, reward, done, _ = env.step(action)
+            
+            # 存储数据
+            states.append(state)
+            actions.append(action)
+            rewards.append(reward)
+            log_probs.append(log_prob)
+            values.append(value)
+            dones.append(done)
+            
+            state = next_state
+            if done:
+                state = env.reset()
+        
+        # 计算优势函数
+        advantages, returns = compute_gae(rewards, values, dones, gamma, lambda_)
+        
+        # 策略更新阶段
+        old_log_probs = log_probs.clone()
+        
+        for epoch in range(update_epochs):
+            # 随机打乱数据
+            indices = torch.randperm(batch_size)
+            
+            for start in range(0, batch_size, mini_batch_size):
+                end = start + mini_batch_size
+                batch_indices = indices[start:end]
+                
+                # 计算新的策略概率和价值
+                batch_states = states[batch_indices]
+                batch_actions = actions[batch_indices]
+                batch_old_log_probs = old_log_probs[batch_indices]
+                batch_advantages = advantages[batch_indices]
+                batch_returns = returns[batch_indices]
+                
+                action_dist = policy_network(batch_states)
+                new_log_probs = action_dist.log_prob(batch_actions)
+                new_values = value_network(batch_states)
+                
+                # 计算比率
+                ratio = torch.exp(new_log_probs - batch_old_log_probs)
+                
+                # 计算策略损失
+                surr1 = ratio * batch_advantages
+                surr2 = torch.clamp(ratio, 1 - epsilon, 1 + epsilon) * batch_advantages
+                policy_loss = -torch.min(surr1, surr2).mean()
+                
+                # 计算价值损失
+                value_loss = F.mse_loss(new_values, batch_returns)
+                
+                # 计算熵损失
+                entropy_loss = -action_dist.entropy().mean()
+                
+                # 总损失
+                total_loss = policy_loss + c1 * value_loss + c2 * entropy_loss
+                
+                # 更新参数
+                optimizer.zero_grad()
+                total_loss.backward()
+                optimizer.step()
+        
+        # 记录训练统计信息
+        log_training_stats(iteration, policy_loss, value_loss, entropy_loss)
+        
+        # 评估模型
+        if iteration % eval_freq == 0:
+            avg_reward = evaluate_model(policy_network, env)
+            print(f"Iteration {iteration}: Average Reward = {avg_reward:.2f}")
+
+
+# GAE计算函数
+def compute_gae(rewards, values, dones, gamma, lambda_):
+    advantages = []
+    returns = []
+    gae = 0
+    
+    for t in reversed(range(len(rewards))):
+        if t == len(rewards) - 1:
+            next_value = 0
+        else:
+            next_value = values[t + 1]
+        
+        delta = rewards[t] + gamma * next_value * (1 - dones[t]) - values[t]
+        gae = delta + gamma * lambda_ * (1 - dones[t]) * gae
+        advantages.insert(0, gae)
+        returns.insert(0, gae + values[t])
+    
+    return torch.tensor(advantages), torch.tensor(returns)</code></pre>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-check-double"></i> 总结</h2>
+                
+                <div class="summary-box">
+                    <p>PPO算法通过七个阶段的精心设计，实现了稳定高效的策略优化：</p>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <h4>1. 初始化</h4>
+                            <p>设置网络架构和超参数</p>
+                        </div>
+                        <div class="summary-item">
+                            <h4>2. 数据收集</h4>
+                            <p>与环境交互收集经验</p>
+                        </div>
+                        <div class="summary-item">
+                            <h4>3. 优势计算</h4>
+                            <p>使用GAE计算优势函数</p>
+                        </div>
+                        <div class="summary-item">
+                            <h4>4. 网络优化</h4>
+                            <p>通过裁剪目标函数更新策略</p>
+                        </div>
+                        <div class="summary-item">
+                            <h4>5. 重复更新</h4>
+                            <p>多轮更新提高样本效率</p>
+                        </div>
+                        <div class="summary-item">
+                            <h4>6. 训练监控</h4>
+                            <p>跟踪性能指标并调整</p>
+                        </div>
+                        <div class="summary-item">
+                            <h4>7. 评估保存</h4>
+                            <p>评估模型并保存最佳版本</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="navigation-buttons">
+                <a href="homework11-06-dqn.html" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 上一个作业
+                </a>
+                <a href="index.html" class="btn-primary">
+                    <i class="fas fa-home"></i> 返回主页
+                </a>
+                <a href="homework11-11.html" class="btn-secondary">
+                    下一个作业 <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>高级人工智能课程复习网站 © 2024</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

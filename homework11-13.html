@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11.13课堂作业 - 数据集划分</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="index.html" class="nav-brand">
+                <i class="fas fa-brain"></i>
+                高级人工智能课程复习
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content-card">
+            <div class="homework-header">
+                <h1><i class="fas fa-database"></i> 11.13课堂作业：数据集划分</h1>
+                <div class="homework-meta">
+                    <span><i class="fas fa-calendar"></i> 2024年11月13日</span>
+                    <span><i class="fas fa-tag"></i> 机器学习基础</span>
+                </div>
+            </div>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-question-circle"></i> 作业题目</h2>
+                <div class="question-box">
+                    <p><strong>题目：</strong>详细阐述训练集、测试集和验证集的作用、要求及应用示例。</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-layer-group"></i> 一、训练集和测试集</h2>
+                
+                <h3>1.1 训练集（Training Set）</h3>
+                <div class="dataset-box">
+                    <h4><i class="fas fa-graduation-cap"></i> 作用</h4>
+                    <ul>
+                        <li>用于训练机器学习模型，让模型从数据中学习特征和模式</li>
+                        <li>通过训练集数据调整模型参数，使模型能够拟合数据的内在规律</li>
+                        <li>是模型学习的主要数据来源</li>
+                    </ul>
+
+                    <h4><i class="fas fa-check-circle"></i> 要求</h4>
+                    <ul>
+                        <li>数据量要充足，通常占总数据集的<strong>60%-80%</strong></li>
+                        <li>数据应具有代表性，能够反映真实问题的数据分布</li>
+                        <li>数据质量要高，标签准确无误</li>
+                        <li>应包含各类样本的充分代表，避免类别不平衡问题</li>
+                    </ul>
+                </div>
+
+                <h3>1.2 测试集（Test Set）</h3>
+                <div class="dataset-box">
+                    <h4><i class="fas fa-clipboard-check"></i> 作用</h4>
+                    <ul>
+                        <li>用于评估模型在未见过的数据上的泛化能力</li>
+                        <li>提供模型性能的无偏估计</li>
+                        <li>检验模型是否过拟合或欠拟合</li>
+                        <li>作为模型最终性能的评价标准</li>
+                    </ul>
+
+                    <h4><i class="fas fa-exclamation-triangle"></i> 要求</h4>
+                    <ul>
+                        <li>必须与训练集<strong>完全独立</strong>，在训练过程中不能使用</li>
+                        <li>数据分布应与训练集相似，但样本不能重复</li>
+                        <li>通常占总数据集的<strong>20%-40%</strong></li>
+                        <li>只能在模型训练完成后使用一次，避免"数据泄露"</li>
+                        <li>不能用测试集的结果来调整模型，否则会导致过拟合</li>
+                    </ul>
+                </div>
+
+                <h3>1.3 划分原则</h3>
+                <div class="principle-grid">
+                    <div class="principle-item">
+                        <i class="fas fa-ban"></i>
+                        <h4>独立性原则</h4>
+                        <p>训练集和测试集必须严格分离，不能有交集</p>
+                    </div>
+                    <div class="principle-item">
+                        <i class="fas fa-random"></i>
+                        <h4>随机性原则</h4>
+                        <p>应随机划分数据，避免引入偏差</p>
+                    </div>
+                    <div class="principle-item">
+                        <i class="fas fa-layer-group"></i>
+                        <h4>分层采样</h4>
+                        <p>对于类别不平衡的数据，应采用分层抽样保持各类别比例</p>
+                    </div>
+                    <div class="principle-item">
+                        <i class="fas fa-clock"></i>
+                        <h4>时间序列特殊处理</h4>
+                        <p>对于时间序列数据，应按时间顺序划分，不能随机打乱</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-check-double"></i> 二、验证集的作用及应用示例</h2>
+                
+                <h3>2.1 验证集（Validation Set）的作用</h3>
+                <div class="validation-intro">
+                    <p>验证集是在训练集和测试集之外的第三个数据集，主要用于模型开发过程中的调优和选择。</p>
+                    
+                    <h4><i class="fas fa-bullseye"></i> 核心作用</h4>
+                    <ul>
+                        <li>用于超参数调优</li>
+                        <li>用于模型选择和比较</li>
+                        <li>防止在测试集上过拟合</li>
+                        <li>提供模型训练过程中的中间评估</li>
+                    </ul>
+
+                    <h4><i class="fas fa-chart-pie"></i> 典型划分比例</h4>
+                    <div class="split-ratio">
+                        <div class="ratio-item">训练集：<strong>60%</strong></div>
+                        <div class="ratio-item">验证集：<strong>20%</strong></div>
+                        <div class="ratio-item">测试集：<strong>20%</strong></div>
+                    </div>
+                </div>
+
+                <h3>2.2 示例1：神经网络超参数调优</h3>
+                <div class="example-box">
+                    <h4>场景描述</h4>
+                    <p>训练一个深度神经网络进行图像分类任务，需要确定最优的超参数配置。</p>
+
+                    <h4>验证集的使用过程</h4>
+                    <div class="process-steps">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h5>定义超参数搜索空间</h5>
+                                <ul>
+                                    <li>学习率：[0.001, 0.01, 0.1]</li>
+                                    <li>批次大小：[32, 64, 128]</li>
+                                    <li>隐藏层数：[2, 3, 4]</li>
+                                    <li>Dropout率：[0.2, 0.3, 0.5]</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h5>训练和验证流程</h5>
+                                <div class="code-box">
+                                    <pre>对于每组超参数组合：
+    在训练集上训练模型
+    在验证集上评估性能
+    记录验证集准确率</pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h5>选择最优配置</h5>
+                                <ul>
+                                    <li>比较所有配置在验证集上的表现</li>
+                                    <li>选择验证集准确率最高的超参数组合</li>
+                                    <li>例如：学习率=0.01，批次大小=64，隐藏层数=3，Dropout=0.3</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h5>最终评估</h5>
+                                <ul>
+                                    <li>使用选定的超参数在训练集上重新训练</li>
+                                    <li>在测试集上进行最终性能评估</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box">
+                        <h5><i class="fas fa-lightbulb"></i> 验证集的作用</h5>
+                        <ul>
+                            <li>如果直接在测试集上调参，会导致模型"记住"测试集的特点</li>
+                            <li>验证集提供了一个独立的评估标准，避免过拟合到测试集</li>
+                            <li>可以多次使用验证集而不影响最终评估的公正性</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>2.3 示例2：模型选择（算法比较）</h3>
+                <div class="example-box">
+                    <h4>场景描述</h4>
+                    <p>对于一个客户流失预测问题，需要从多个机器学习算法中选择最适合的模型。</p>
+
+                    <h4>候选模型</h4>
+                    <div class="model-list">
+                        <div class="model-item">1. 逻辑回归（Logistic Regression）</div>
+                        <div class="model-item">2. 支持向量机（SVM）</div>
+                        <div class="model-item">3. 随机森林（Random Forest）</div>
+                        <div class="model-item">4. 梯度提升树（XGBoost）</div>
+                        <div class="model-item">5. 神经网络（Neural Network）</div>
+                    </div>
+
+                    <h4>验证集的使用过程</h4>
+                    <div class="process-steps">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h5>训练阶段</h5>
+                                <div class="code-box">
+                                    <pre>对于每个候选模型：
+    在训练集上训练模型
+    调整该模型的超参数（使用交叉验证或单独的验证集）
+    获得该模型的最优配置</pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h5>验证阶段</h5>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>模型</th>
+                                                <th>准确率</th>
+                                                <th>AUC</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>逻辑回归</td>
+                                                <td>82%</td>
+                                                <td>0.85</td>
+                                            </tr>
+                                            <tr>
+                                                <td>SVM</td>
+                                                <td>84%</td>
+                                                <td>0.87</td>
+                                            </tr>
+                                            <tr>
+                                                <td>随机森林</td>
+                                                <td>88%</td>
+                                                <td>0.91</td>
+                                            </tr>
+                                            <tr class="highlight">
+                                                <td><strong>XGBoost</strong></td>
+                                                <td><strong>90%</strong></td>
+                                                <td><strong>0.93</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td>神经网络</td>
+                                                <td>89%</td>
+                                                <td>0.92</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h5>模型选择</h5>
+                                <ul>
+                                    <li>根据验证集表现，选择XGBoost作为最终模型</li>
+                                    <li>考虑准确率、AUC、训练时间、可解释性等多个因素</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h5>最终评估</h5>
+                                <ul>
+                                    <li>使用选定的XGBoost模型在测试集上评估</li>
+                                    <li>测试集准确率：89%，AUC 0.92</li>
+                                    <li>这个结果才是模型真实性能的无偏估计</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box">
+                        <h5><i class="fas fa-lightbulb"></i> 验证集的作用</h5>
+                        <ul>
+                            <li>如果直接在测试集上比较模型，选择表现最好的，相当于把测试集当作训练的一部分</li>
+                            <li>这样会导致选出的模型在测试集上表现好，但在真实新数据上可能表现差</li>
+                            <li>验证集作为"模拟测试集"，让我们可以安全地进行模型选择</li>
+                            <li>保持测试集的"纯洁性"，确保最终评估的可靠性</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>2.4 验证集的替代方法：交叉验证</h3>
+                <div class="alternative-box">
+                    <p>当数据量较小时，可以使用<strong>K折交叉验证（K-Fold Cross-Validation）</strong>代替单独的验证集：</p>
+                    <ul>
+                        <li>将训练数据分成K份</li>
+                        <li>轮流使用其中一份作为验证集，其余作为训练集</li>
+                        <li>重复K次，取平均性能作为模型评估指标</li>
+                        <li>这样可以更充分地利用有限的数据</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-list-check"></i> 总结</h2>
+                
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h4>训练集</h4>
+                        <p>用于学习模型参数</p>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-sliders-h"></i>
+                        <h4>验证集</h4>
+                        <p>用于调优超参数和选择模型</p>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-clipboard-check"></i>
+                        <h4>测试集</h4>
+                        <p>用于最终性能评估</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="navigation-buttons">
+                <a href="homework11-11.html" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 上一个作业
+                </a>
+                <a href="index.html" class="btn-primary">
+                    <i class="fas fa-home"></i> 返回主页
+                </a>
+                <a href="homework11-18.html" class="btn-secondary">
+                    下一个作业 <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>高级人工智能课程复习网站 © 2024</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

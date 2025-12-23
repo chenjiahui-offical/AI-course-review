@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11.27课堂作业 - 显存优化与混合精度</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="index.html" class="nav-brand">
+                <i class="fas fa-brain"></i>
+                高级人工智能课程复习
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content-card">
+            <div class="homework-header">
+                <h1><i class="fas fa-memory"></i> 11.27课堂作业：显存优化与混合精度训练</h1>
+                <div class="homework-meta">
+                    <span><i class="fas fa-calendar"></i> 2024年11月27日</span>
+                    <span><i class="fas fa-tag"></i> 深度学习优化</span>
+                </div>
+            </div>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-question-circle"></i> 作业题目</h2>
+                <div class="question-box">
+                    <p><strong>问题一：</strong>batch_size对显存占用的影响：batch_size=1和batch_size=2的显存占用区别</p>
+                    <p><strong>问题二：</strong>降低临时变量精度的问题及解决方案</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-chart-bar"></i> 问题一：batch_size对显存占用的影响</h2>
+                
+                <div class="conclusion-box">
+                    <h3><i class="fas fa-exclamation-circle"></i> 核心结论</h3>
+                    <p>batch_size=2的显存占用<strong>不会简单地是</strong>batch_size=1的2倍，通常会<strong>略少于2倍</strong>。</p>
+                </div>
+
+                <h3>1.1 原因分析</h3>
+                
+                <h4><i class="fas fa-layer-group"></i> 1. 激活值的显存占用（线性相关）</h4>
+                <div class="reason-box">
+                    <ul>
+                        <li><strong>batch_size=1</strong>: 每层的激活值只存储1个样本</li>
+                        <li><strong>batch_size=2</strong>: 每层的激活值存储2个样本</li>
+                        <li>显存占用基本成线性关系：<code>2 × batch_size=1的激活显存</code></li>
+                    </ul>
+                </div>
+
+                <h4><i class="fas fa-weight"></i> 2. 模型参数和梯度（固定开销）</h4>
+                <div class="reason-box">
+                    <ul>
+                        <li><strong>模型参数</strong>: 与batch_size无关，只与模型结构有关</li>
+                        <li><strong>优化器状态</strong>: Adam等优化器需要额外的动量和方差参数</li>
+                        <li>这部分显存占用在batch_size=1和2时<strong>完全相同</strong></li>
+                    </ul>
+                </div>
+
+                <h4><i class="fas fa-cog"></i> 3. 固定开销（与batch_size无关）</h4>
+                <div class="reason-box">
+                    <ul>
+                        <li><strong>CUDA上下文</strong>: GPU驱动和CUDA运行时的固定开销</li>
+                        <li><strong>框架开销</strong>: PyTorch/TensorFlow等框架的内部缓存</li>
+                        <li><strong>内存管理</strong>: GPU内存分配器的基本开销</li>
+                    </ul>
+                </div>
+
+                <h4><i class="fas fa-tachometer-alt"></i> 4. 内存管理效率</h4>
+                <div class="reason-box">
+                    <ul>
+                        <li><strong>内存对齐</strong>: GPU内存有对齐要求，可能造成轻微的内存浪费</li>
+                        <li><strong>向量化优化</strong>: 更大的batch_size可能获得更好的计算效率</li>
+                        <li><strong>内存碎片</strong>: 不同batch_size下，内存碎片化程度不同</li>
+                    </ul>
+                </div>
+
+                <h3>1.2 理论显存占用公式</h3>
+                <div class="formula-box">
+                    <div class="katex-display">
+                        $$\text{总显存} \approx \text{模型参数} + \text{优化器状态} + \text{固定开销} + (\text{batch\_size} \times \text{激活值内存})$$
+                    </div>
+                    <p>其中：</p>
+                    <ul>
+                        <li>模型参数 = \(4 \times \text{参数数量}\) 字节（FP32）</li>
+                        <li>优化器状态 ≈ \(8 \times \text{参数数量}\) 字节（Adam优化器）</li>
+                        <li>激活值内存 ≈ \(4 \times \text{激活值数量} \times \text{batch\_size}\) 字节</li>
+                    </ul>
+                </div>
+
+                <h3>1.3 总结</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <i class="fas fa-chart-line"></i>
+                        <h4>非线性关系</h4>
+                        <p>batch_size与显存占用不是简单的线性关系</p>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-anchor"></i>
+                        <h4>固定开销占主导</h4>
+                        <p>存在大量与batch_size无关的固定显存开销</p>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-arrow-down"></i>
+                        <h4>边际效应递减</h4>
+                        <p>增加batch_size的边际显存成本递减</p>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-rocket"></i>
+                        <h4>优化机会</h4>
+                        <p>更大的batch_size可能获得更好的内存管理效率</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-compress-alt"></i> 问题二：降低临时变量精度的问题及解决方案</h2>
+                
+                <h3>2.1 降低精度的作用</h3>
+                <div class="benefit-box">
+                    <p>降低临时变量精度（如从FP32降到FP16或BF16）可以：</p>
+                    <div class="benefit-grid">
+                        <div class="benefit-item">
+                            <i class="fas fa-memory"></i>
+                            <h4>显存占用减少</h4>
+                            <p>约50%</p>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-bolt"></i>
+                            <h4>训练速度提升</h4>
+                            <p>支持Tensor Core的GPU</p>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                            <h4>更大batch_size</h4>
+                            <p>允许使用更大的batch_size或模型</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>2.2 降低精度存在的问题</h3>
+                
+                <h4><i class="fas fa-exclamation-triangle"></i> 1. 数值不稳定问题</h4>
+                <div class="problem-box">
+                    <ul>
+                        <li><strong>下溢问题</strong>: 小数值可能会变成零，导致梯度消失</li>
+                        <li><strong>上溢问题</strong>: 大数值可能溢出，导致梯度爆炸</li>
+                        <li><strong>数值范围缩小</strong>: FP16的动态范围(6×10⁻⁸到6×10⁴)比FP32(10⁻³⁸到10³⁸)小得多</li>
+                    </ul>
+                    <p class="note">会影响softmax、sigmoid激活函数的输出，梯度更新过程，BatchNorm层的数值计算等</p>
+                </div>
+
+                <h4><i class="fas fa-chart-line-down"></i> 2. 训练精度下降</h4>
+                <div class="problem-box">
+                    <ul>
+                        <li>权重更新的精度降低</li>
+                        <li>激活值计算精度损失</li>
+                        <li>可能导致模型收敛困难或收敛到次优解</li>
+                        <li>某些敏感的网络结构受影响较大</li>
+                    </ul>
+                </div>
+
+                <h4><i class="fas fa-ban"></i> 3. 某些操作的不兼容</h4>
+                <div class="problem-box">
+                    <ul>
+                        <li>某些数学运算在低精度下不稳定</li>
+                        <li>某些网络层（如BatchNorm）对精度敏感</li>
+                        <li>特殊的激活函数可能出现数值问题</li>
+                        <li>累积计算中的精度损失</li>
+                    </ul>
+                </div>
+
+                <h3>2.3 对应解决方案</h3>
+                
+                <h4><i class="fas fa-balance-scale"></i> 解决方案1：混合精度训练（Mixed Precision Training）</h4>
+                <div class="solution-box">
+                    <h5>核心思想</h5>
+                    <ul>
+                        <li>保持FP32精度的主权重副本用于精度保证</li>
+                        <li>使用FP16进行前向和反向传播节省显存</li>
+                        <li>累加梯度时使用FP32精度防止精度损失</li>
+                    </ul>
+
+                    <h5>PyTorch实现</h5>
+                    <pre><code class="language-python">import torch
+from torch.cuda.amp import autocast, GradScaler
+
+# 初始化梯度缩放器
+scaler = GradScaler()
+
+for data, target in train_loader:
+    optimizer.zero_grad()
+    
+    # 自动混合精度上下文
+    with autocast():
+        output = model(data)
+        loss = criterion(output, target)
+    
+    # 缩放损失以防止梯度下溢
+    scaler.scale(loss).backward()
+    
+    # 优化器步进（自动缩放回原始精度）
+    scaler.step(optimizer)
+    scaler.update()</code></pre>
+                </div>
+
+                <h4><i class="fas fa-expand"></i> 解决方案2：梯度缩放（Gradient Scaling）</h4>
+                <div class="solution-box">
+                    <h5>原理</h5>
+                    <ul>
+                        <li>在反向传播前放大损失值，防止小梯度下溢</li>
+                        <li>梯度更新时缩小回原始尺度，保持数值稳定</li>
+                    </ul>
+
+                    <h5>实现示例</h5>
+                    <pre><code class="language-python">def manual_gradient_scaling(model, loss, scale_factor=1024.0):
+    """手动梯度缩放实现"""
+    scaled_loss = loss * scale_factor
+    scaled_loss.backward()
+    
+    # 梯度缩放回原始值
+    for param in model.parameters():
+        if param.grad is not None:
+            param.grad = param.grad / scale_factor</code></pre>
+                </div>
+
+                <h4><i class="fas fa-sync-alt"></i> 解决方案3：动态损失缩放（Dynamic Loss Scaling）</h4>
+                <div class="solution-box">
+                    <h5>自适应策略</h5>
+                    <ul>
+                        <li>自动调整损失缩放因子</li>
+                        <li>检测梯度溢出并动态调整</li>
+                        <li>平衡数值稳定性和精度</li>
+                    </ul>
+
+                    <h5>算法伪代码</h5>
+                    <pre><code class="language-python">class DynamicLossScaler:
+    def __init__(self, init_scale=65536.0, scale_factor=2.0, scale_window=2000):
+        self.scale = init_scale
+        self.scale_factor = scale_factor
+        self.scale_window = scale_window
+        self.counter = 0
+    
+    def step(self, model, optimizer):
+        # 检查梯度溢出
+        has_inf = torch.isinf(torch.cat([p.grad.flatten()
+                                        for p in model.parameters()
+                                        if p.grad is not None])).any()
+        
+        if has_inf:
+            # 梯度溢出，减小缩放因子
+            self.scale /= self.scale_factor
+            optimizer.zero_grad()
+            return False  # 需要重新前向传播
+        else:
+            # 梯度正常，更新缩放因子
+            self.counter += 1
+            if self.counter >= self.scale_window:
+                self.scale *= self.scale_factor
+                self.counter = 0
+            return True  # 可以继续优化</code></pre>
+                </div>
+
+                <h4><i class="fas fa-microchip"></i> 解决方案4：特殊数据格式支持</h4>
+                <div class="solution-box">
+                    <h5>BF16（BFloat16）格式</h5>
+                    <ul>
+                        <li>保持FP32的动态范围</li>
+                        <li>精度略低于FP16但比FP16更适合训练</li>
+                        <li>数值范围：10⁻³⁸到10³⁸（与FP32相同）</li>
+                    </ul>
+
+                    <h5>实现示例</h5>
+                    <pre><code class="language-python"># 使用BF16格式（需要硬件支持）
+model = model.to(dtype=torch.bfloat16)
+
+# 在支持BF16的硬件上训练
+for data, target in train_loader:
+    data = data.to(dtype=torch.bfloat16)
+    output = model(data)
+    loss = criterion(output, target)
+    loss.backward()
+    optimizer.step()</code></pre>
+                </div>
+
+                <h4><i class="fas fa-project-diagram"></i> 解决方案5：网络架构优化</h4>
+                <div class="solution-box">
+                    <h5>数值稳定的网络设计</h5>
+                    <pre><code class="language-python">class NumericalStableNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # 使用数值稳定的激活函数
+        self.activation = nn.ReLU()  # 而非nn.Tanh()
+        self.norm = nn.LayerNorm(eps=1e-6)  # 增加数值稳定性
+    
+    def forward(self, x):
+        x = self.activation(x)
+        x = self.norm(x)
+        return x
+
+# 数值稳定的softmax实现
+def stable_softmax(x, dim=1):
+    """数值稳定的softmax，防止上溢下溢"""
+    x_max = torch.max(x, dim=dim, keepdim=True)[0]
+    x_exp = torch.exp(x - x_max)  # 减去最大值防止上溢
+    return x_exp / torch.sum(x_exp, dim=dim, keepdim=True)</code></pre>
+                </div>
+
+                <h4><i class="fas fa-server"></i> 解决方案6：硬件感知优化</h4>
+                <div class="solution-box">
+                    <h5>Tensor Core优化</h5>
+                    <ul>
+                        <li>利用现代GPU的Tensor Core硬件加速</li>
+                        <li>选择合适的计算精度配置</li>
+                        <li>优化内存访问模式</li>
+                    </ul>
+
+                    <h5>针对不同硬件的精度选择</h5>
+                    <pre><code class="language-python">def get_optimal_dtype():
+    if torch.cuda.is_available():
+        gpu_name = torch.cuda.get_device_name()
+        if 'A100' in gpu_name or 'V100' in gpu_name:
+            return torch.bfloat16  # 新一代GPU支持BF16
+        else:
+            return torch.float16   # 老一代GPU使用FP16
+    return torch.float32</code></pre>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-check-double"></i> 总结</h2>
+                
+                <div class="final-summary">
+                    <h3>关键要点</h3>
+                    <div class="key-points-grid">
+                        <div class="key-point">
+                            <i class="fas fa-1"></i>
+                            <p>batch_size与显存占用不是简单的线性关系，存在大量固定开销</p>
+                        </div>
+                        <div class="key-point">
+                            <i class="fas fa-2"></i>
+                            <p>降低精度可以显著减少显存占用，但需要解决数值稳定性问题</p>
+                        </div>
+                        <div class="key-point">
+                            <i class="fas fa-3"></i>
+                            <p>混合精度训练是最佳实践，结合了效率和稳定性</p>
+                        </div>
+                        <div class="key-point">
+                            <i class="fas fa-4"></i>
+                            <p>梯度缩放技术是解决低精度训练问题的核心方法</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="navigation-buttons">
+                <a href="homework11-18.html" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 上一个作业
+                </a>
+                <a href="index.html" class="btn-primary">
+                    <i class="fas fa-home"></i> 返回主页
+                </a>
+                <a href="homework12-02.html" class="btn-secondary">
+                    下一个作业 <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>高级人工智能课程复习网站 © 2024</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

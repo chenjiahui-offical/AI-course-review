@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11.06课堂作业 - Double DQN算法</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="index.html" class="nav-brand">
+                <i class="fas fa-brain"></i>
+                高级人工智能课程复习
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content-card">
+            <div class="homework-header">
+                <h1><i class="fas fa-layer-group"></i> 11.06课堂作业：Double DQN算法改进</h1>
+                <div class="homework-meta">
+                    <span><i class="fas fa-calendar"></i> 2024年11月6日</span>
+                    <span><i class="fas fa-tag"></i> 深度强化学习</span>
+                </div>
+            </div>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-question-circle"></i> 作业题目</h2>
+                <div class="question-box">
+                    <p><strong>题目：</strong>分析Double DQN算法的改进动机、核心思想、算法架构和伪代码实现。</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-exclamation-triangle"></i> 1. 改进动机</h2>
+                
+                <h3>1.1 传统DQN的问题</h3>
+                <p>传统DQN算法在Q值估计中存在一个严重问题：<strong>高估偏差（Overestimation Bias）</strong>。这个问题的根本原因在于：</p>
+
+                <div class="problem-box">
+                    <h4>1. max操作的高估问题</h4>
+                    <p>DQN使用max操作来选择最大Q值：</p>
+                    <div class="katex-display">
+                        $$Q(s,a) = \mathbb{E}_{s' \sim \mathcal{P}}\left[r + \gamma \max_{a'} Q(s',a')\right]$$
+                    </div>
+                    <p>由于噪声的存在，max操作会倾向于选择被高估的Q值，导致Q值估计偏高。</p>
+
+                    <h4>2. 目标网络与评估网络的耦合</h4>
+                    <p>传统DQN中，同一个网络既要负责选择动作，又要负责评估动作值，这会导致高估偏差的累积。</p>
+                </div>
+
+                <h3>1.2 高估偏差的影响</h3>
+                <div class="impact-grid">
+                    <div class="impact-item">
+                        <i class="fas fa-chart-line"></i>
+                        <h4>学习不稳定</h4>
+                        <p>过高估计的Q值会影响策略的收敛</p>
+                    </div>
+                    <div class="impact-item">
+                        <i class="fas fa-arrow-down"></i>
+                        <h4>性能下降</h4>
+                        <p>错误的Q值估计导致次优策略</p>
+                    </div>
+                    <div class="impact-item">
+                        <i class="fas fa-hourglass-half"></i>
+                        <h4>样本效率降低</h4>
+                        <p>需要更多训练样本来纠正偏差</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-lightbulb"></i> 2. Double DQN的改进方法</h2>
+                
+                <h3>2.1 核心思想</h3>
+                <div class="core-idea-box">
+                    <p>Double DQN通过<strong>解耦动作选择和动作评估</strong>来解决高估偏差问题。它使用两个独立的角色：</p>
+                    <div class="role-grid">
+                        <div class="role-item">
+                            <i class="fas fa-search"></i>
+                            <h4>评估网络（Online Network）</h4>
+                            <p>负责选择最优动作</p>
+                        </div>
+                        <div class="role-item">
+                            <i class="fas fa-bullseye"></i>
+                            <h4>目标网络（Target Network）</h4>
+                            <p>负责评估选定动作的Q值</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>2.2 数学公式对比</h3>
+                <div class="formula-comparison">
+                    <div class="formula-item">
+                        <h4><i class="fas fa-times-circle"></i> 传统DQN的目标函数</h4>
+                        <div class="katex-display">
+                            $$Q^{\text{DQN}}(s,a) = r + \gamma \max_{a'} Q_{\text{target}}(s',a')$$
+                        </div>
+                        <p class="formula-note">同一个网络既选择又评估</p>
+                    </div>
+                    <div class="formula-item highlight">
+                        <h4><i class="fas fa-check-circle"></i> Double DQN的目标函数</h4>
+                        <div class="katex-display">
+                            $$Q^{\text{Double-DQN}}(s,a) = r + \gamma Q_{\text{target}}(s', \arg\max_{a'} Q_{\text{online}}(s',a'))$$
+                        </div>
+                        <p class="formula-note">在线网络选择，目标网络评估</p>
+                    </div>
+                </div>
+
+                <h3>2.3 关键改进点</h3>
+                <div class="improvement-steps">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>动作选择</h4>
+                            <p>使用在线网络选择最优动作：</p>
+                            <div class="katex-display">
+                                $$a^* = \arg\max_{a'} Q_{\text{online}}(s',a')$$
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Q值评估</h4>
+                            <p>使用目标网络评估选定动作的Q值：</p>
+                            <div class="katex-display">
+                                $$Q_{\text{target}}(s',a^*)$$
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-sitemap"></i> 3. Double DQN架构图</h2>
+                
+                <div class="architecture-box">
+                    <div class="architecture-description">
+                        <h3>架构说明</h3>
+                        <p>Double DQN包含两个网络：</p>
+                        <ul>
+                            <li><strong>在线网络（Online Network）</strong>：参数为 \(\theta\)，用于选择动作</li>
+                            <li><strong>目标网络（Target Network）</strong>：参数为 \(\theta^-\)，用于评估Q值</li>
+                        </ul>
+                        <p>目标网络定期从在线网络复制参数，保持相对稳定。</p>
+                    </div>
+
+                    <div class="architecture-flow">
+                        <h3>数据流程</h3>
+                        <div class="flow-steps">
+                            <div class="flow-step">
+                                <i class="fas fa-database"></i>
+                                <p>经验回放池</p>
+                                <span>\((s, a, r, s')\)</span>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">
+                                <i class="fas fa-network-wired"></i>
+                                <p>在线网络</p>
+                                <span>选择 \(a^* = \arg\max Q_{\text{online}}(s',a')\)</span>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">
+                                <i class="fas fa-bullseye"></i>
+                                <p>目标网络</p>
+                                <span>评估 \(Q_{\text{target}}(s',a^*)\)</span>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">
+                                <i class="fas fa-calculator"></i>
+                                <p>计算目标</p>
+                                <span>\(y = r + \gamma Q_{\text{target}}(s',a^*)\)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-code"></i> 4. 算法伪代码</h2>
+                
+                <div class="pseudocode-box">
+                    <pre><code class="language-python">初始化在线网络参数 θ
+初始化目标网络参数 θ⁻ ← θ
+初始化经验回放缓冲区 D
+
+for episode = 1 to M do
+    初始化状态 s₁
+    for t = 1 to T do
+        # 使用 ε-greedy 策略选择动作
+        if random() < ε:
+            a_t = 随机动作
+        else:
+            a_t = argmax_a Q_online(s_t, a; θ)
+
+        # 执行动作，观察结果
+        执行动作 a_t，观察奖励 r_t 和下一状态 s_{t+1}
+
+        # 存储经验
+        将转移 (s_t, a_t, r_t, s_{t+1}) 存入 D
+
+        # 从经验回放池采样
+        从 D 中随机采样小批量转移 (s_j, a_j, r_j, s_{j+1})
+
+        # Double DQN 关键步骤
+        # 步骤1：在线网络选择动作
+        a* = argmax_a Q_online(s_{j+1}, a; θ)
+        
+        # 步骤2：目标网络评估Q值
+        y_j = r_j + γ * Q_target(s_{j+1}, a*; θ⁻)
+
+        # 计算损失
+        L(θ) = (y_j - Q_online(s_j, a_j; θ))²
+
+        # 通过梯度下降更新在线网络参数
+        θ ← θ - α∇_θ L(θ)
+
+        # 定期更新目标网络
+        if t mod C == 0:
+            θ⁻ ← θ
+    end
+end</code></pre>
+                </div>
+
+                <h3>算法关键步骤解析</h3>
+                <div class="step-explanation-grid">
+                    <div class="explanation-item">
+                        <h4><i class="fas fa-1"></i> 动作选择（在线网络）</h4>
+                        <p>使用在线网络 \(Q_{\text{online}}\) 选择下一状态 \(s'\) 的最优动作：</p>
+                        <div class="katex-display">
+                            $$a^* = \arg\max_{a'} Q_{\text{online}}(s_{j+1}, a'; \theta)$$
+                        </div>
+                        <p>这一步确定了我们认为最好的动作。</p>
+                    </div>
+                    <div class="explanation-item">
+                        <h4><i class="fas fa-2"></i> Q值评估（目标网络）</h4>
+                        <p>使用目标网络 \(Q_{\text{target}}\) 评估选定动作的Q值：</p>
+                        <div class="katex-display">
+                            $$y_j = r_j + \gamma Q_{\text{target}}(s_{j+1}, a^*; \theta^-)$$
+                        </div>
+                        <p>这一步避免了高估偏差，因为评估和选择是分离的。</p>
+                    </div>
+                    <div class="explanation-item">
+                        <h4><i class="fas fa-3"></i> 损失计算</h4>
+                        <p>计算预测Q值与目标Q值之间的均方误差：</p>
+                        <div class="katex-display">
+                            $$L(\theta) = \frac{1}{N}\sum_j (y_j - Q_{\text{online}}(s_j, a_j; \theta))^2$$
+                        </div>
+                    </div>
+                    <div class="explanation-item">
+                        <h4><i class="fas fa-4"></i> 参数更新</h4>
+                        <p>通过梯度下降更新在线网络参数，目标网络定期从在线网络复制参数：</p>
+                        <div class="katex-display">
+                            $$\theta \leftarrow \theta - \alpha \nabla_\theta L(\theta)$$
+                            $$\theta^- \leftarrow \theta \quad \text{(每C步)}$$
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-check-double"></i> 5. 总结</h2>
+                
+                <div class="summary-box">
+                    <p>Double DQN通过对传统DQN的简单而有效的改进，成功解决了Q值高估偏差问题。其核心创新在于将<strong>动作选择</strong>和<strong>Q值评估</strong>分离到两个不同的网络中，这一改进虽然简单，却显著提升了算法的性能和稳定性。</p>
+                    
+                    <h3>关键优势</h3>
+                    <div class="advantage-grid">
+                        <div class="advantage-item">
+                            <i class="fas fa-check-circle"></i>
+                            <h4>解决高估偏差</h4>
+                            <p>通过解耦动作选择和评估，有效减少Q值高估</p>
+                        </div>
+                        <div class="advantage-item">
+                            <i class="fas fa-check-circle"></i>
+                            <h4>实现简单</h4>
+                            <p>只需修改目标Q值的计算方式，代码改动很小</p>
+                        </div>
+                        <div class="advantage-item">
+                            <i class="fas fa-check-circle"></i>
+                            <h4>性能提升</h4>
+                            <p>在多个基准测试中表现优于传统DQN</p>
+                        </div>
+                        <div class="advantage-item">
+                            <i class="fas fa-check-circle"></i>
+                            <h4>训练稳定</h4>
+                            <p>减少Q值波动，提高学习稳定性</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="navigation-buttons">
+                <a href="homework11-04-ac.html" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 上一个作业
+                </a>
+                <a href="index.html" class="btn-primary">
+                    <i class="fas fa-home"></i> 返回主页
+                </a>
+                <a href="homework11-06-ppo.html" class="btn-secondary">
+                    下一个作业 <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>高级人工智能课程复习网站 © 2024</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

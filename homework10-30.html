@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10.30课堂作业：强化学习折扣因子</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> 返回目录</a>
+        
+        <h1>10.30课堂作业：强化学习折扣因子</h1>
+        
+        <div class="highlight-box">
+            <h4><i class="fas fa-lightbulb"></i> 核心目的</h4>
+            <p>折扣因子的引入<strong>实际上就是为了能够收敛</strong></p>
+        </div>
+        
+        <h2>1. 折扣因子的数学定义</h2>
+        
+        <p>在强化学习中，状态价值函数$V(s)$和动作价值函数$Q(s,a)$的递推方程中，折扣因子$\gamma$（或$\lambda$）用于对未来奖励进行加权：</p>
+        
+        <div class="formula">
+            <p><strong>状态价值函数：</strong></p>
+            <p>$V(s) = \mathbb{E}\left[R_t + \gamma R_{t+1} + \gamma^2 R_{t+2} + \cdots \mid S_t = s\right]$</p>
+        </div>
+        
+        <div class="formula">
+            <p><strong>动作价值函数：</strong></p>
+            <p>$Q(s,a) = \mathbb{E}\left[R_t + \gamma R_{t+1} + \gamma^2 R_{t+2} + \cdots \mid S_t = s, A_t = a\right]$</p>
+        </div>
+        
+        <h2>2. 主要原因分析</h2>
+        
+        <h3>2.1 重新计算/估计路径收益</h3>
+        
+        <h4>问题背景</h4>
+        <p>在无限时间序列的MDP中，如果不对未来奖励进行折扣，可能出现以下问题：</p>
+        
+        <div class="warning-box">
+            <h4><i class="fas fa-exclamation-triangle"></i> 无折扣的问题</h4>
+            <ul>
+                <li><strong>无限奖励和问题</strong>：当奖励序列不收敛时，总和可能无限大</li>
+                <li><strong>数值计算困难</strong>：无限求和在实际计算中不可行</li>
+                <li><strong>收敛性问题</strong>：算法可能无法收敛到稳定解</li>
+            </ul>
+        </div>
+        
+        <h4>折扣因子的解决方案</h4>
+        
+        <p><strong>几何级数收敛性：</strong></p>
+        <p>引入折扣因子$\gamma$后，即使奖励序列有界，无限和也会收敛：</p>
+        
+        <div class="formula">
+            <p>$\sum_{t=0}^{\infty} \gamma^t R_t \leq R_{\max} \sum_{t=0}^{\infty} \gamma^t = \frac{R_{\max}}{1-\gamma}$</p>
+        </div>
+        
+        <p><strong>路径收益重新定义：</strong></p>
+        <table>
+            <tr>
+                <th>类型</th>
+                <th>公式</th>
+                <th>特点</th>
+            </tr>
+            <tr>
+                <td>原始路径收益</td>
+                <td>$G_t = \sum_{k=0}^{\infty} R_{t+k}$</td>
+                <td>可能发散</td>
+            </tr>
+            <tr>
+                <td>折扣路径收益</td>
+                <td>$G_t = \sum_{k=0}^{\infty} \gamma^k R_{t+k}$</td>
+                <td>保证收敛</td>
+            </tr>
+        </table>
+        
+        <p><strong>实际意义：</strong></p>
+        <ul>
+            <li>近期奖励获得更高权重</li>
+            <li>远期奖励影响逐渐减弱</li>
+            <li>符合人类决策的直觉偏好</li>
+        </ul>
+        
+        <h3>2.2 修正递推方程</h3>
+        
+        <h4>Bellman方程的修正</h4>
+        
+        <p><strong>无折扣情况的问题：</strong></p>
+        <div class="formula">
+            <p>$V(s) = \sum_a \pi(a|s) \sum_{s'} P(s'|s,a) \left[ R(s,a,s') + V(s') \right]$</p>
+        </div>
+        
+        <div class="warning-box">
+            <h4><i class="fas fa-exclamation-triangle"></i> 这种形式可能导致</h4>
+            <ul>
+                <li>方程无解或存在多个解</li>
+                <li>迭代算法不收敛</li>
+                <li>最优策略不存在</li>
+            </ul>
+        </div>
+        
+        <p><strong>引入折扣因子后的Bellman方程：</strong></p>
+        <div class="formula">
+            <p>$V(s) = \sum_a \pi(a|s) \sum_{s'} P(s'|s,a) \left[ R(s,a,s') + \gamma V(s') \right]$</p>
+        </div>
+        
+        <h4>修正的数学优势</h4>
+        
+        <div class="success-box">
+            <h4><i class="fas fa-check-circle"></i> 1. 唯一解存在性</h4>
+            <ul>
+                <li>折扣因子$\gamma \in [0,1)$保证了价值函数的唯一性</li>
+                <li>压缩映射原理确保迭代收敛</li>
+            </ul>
+        </div>
+        
+        <div class="success-box">
+            <h4><i class="fas fa-check-circle"></i> 2. 收敛速度控制</h4>
+            <ul>
+                <li>$\gamma$越接近1，收敛越慢但考虑更长远</li>
+                <li>$\gamma$越接近0，收敛越快但更关注短期</li>
+            </ul>
+        </div>
+        
+        <div class="success-box">
+            <h4><i class="fas fa-check-circle"></i> 3. 算法稳定性</h4>
+            <ul>
+                <li>值迭代、策略迭代等方法需要折扣因子保证收敛</li>
+                <li>时序差分(TD)学习的稳定性依赖折扣因子</li>
+            </ul>
+        </div>
+        
+        <h2>3. 折扣因子的深层含义</h2>
+        
+        <h3>3.1 经济学解释</h3>
+        <ul>
+            <li><strong>时间偏好</strong>：人类倾向于立即获得奖励而非等待</li>
+            <li><strong>不确定性</strong>：未来状态转换存在随机性和不确定性</li>
+            <li><strong>机会成本</strong>：延迟奖励可能失去其他机会</li>
+        </ul>
+        
+        <h3>3.2 算法实现角度</h3>
+        <ul>
+            <li><strong>计算复杂度控制</strong>：有效截断无限时间序列</li>
+            <li><strong>探索-利用平衡</strong>：影响算法对不同时间尺度奖励的关注</li>
+            <li><strong>稳定性保证</strong>：确保学习过程的数学稳定性</li>
+        </ul>
+        
+        <h2>4. 折扣因子的选择策略</h2>
+        
+        <h3>4.1 经验法则</h3>
+        <table>
+            <tr>
+                <th>$\gamma$值</th>
+                <th>适用场景</th>
+                <th>特点</th>
+            </tr>
+            <tr>
+                <td>$0.9 \sim 0.99$</td>
+                <td>大多数强化学习应用</td>
+                <td>标准选择</td>
+            </tr>
+            <tr>
+                <td>$0.95$</td>
+                <td>平衡短期和长期收益</td>
+                <td>常用值</td>
+            </tr>
+            <tr>
+                <td>$< 0.8$</td>
+                <td>需要快速收敛的简单任务</td>
+                <td>短期导向</td>
+            </tr>
+        </table>
+        
+        <h3>4.2 任务特定考虑</h3>
+        <ul>
+            <li><strong>任务时间尺度</strong>：短期任务使用较小$\gamma$值</li>
+            <li><strong>环境确定性</strong>：确定性环境可使用较大$\gamma$值</li>
+            <li><strong>奖励稀疏性</strong>：奖励稀疏环境需要较大$\gamma$值</li>
+        </ul>
+        
+        <h2>5. 理论保证</h2>
+        
+        <h3>5.1 数学收敛性</h3>
+        <ul>
+            <li><strong>压缩映射</strong>：$\gamma < 1$时Bellman算子是压缩映射</li>
+            <li><strong>唯一不动点</strong>：存在唯一的价值函数解</li>
+            <li><strong>几何收敛</strong>：迭代误差以$\gamma$的几何级数递减</li>
+        </ul>
+        
+        <h3>5.2 最优策略存在性</h3>
+        <ul>
+            <li><strong>有限MDP</strong>：折扣因子保证最优策略存在</li>
+            <li><strong>无限MDP</strong>：折扣因子扩展了适用范围</li>
+            <li><strong>近似算法</strong>：为函数逼近提供理论基础</li>
+        </ul>
+        
+        <h2>6. 实际应用中的考量</h2>
+        
+        <h3>6.1 算法实现</h3>
+        
+        <p>值迭代算法中的折扣因子应用：</p>
+        
+        <pre><code class="language-python">def value_iteration(P, R, gamma=0.95, theta=1e-6):
+    n_states = len(P)
+    V = np.zeros(n_states)
+
+    while True:
+        delta = 0
+        for s in range(n_states):
+            v_old = V[s]
+            V[s] = max([np.sum(P[s][a] * (R[s][a] + gamma * V))
+                       for a in range(len(P[s]))])
+            delta = max(delta, abs(v_old - V[s]))
+
+        if delta < theta:
+            break
+
+    return V</code></pre>
+        
+        <p>对应的数学更新公式为：</p>
+        <div class="formula">
+            <p>$V_{k+1}(s) = \max_a \sum_{s'} P(s'|s,a) \left[ R(s,a,s') + \gamma V_k(s') \right]$</p>
+        </div>
+        
+        <h3>6.2 超参数调优</h3>
+        <ul>
+            <li><strong>网格搜索</strong>：在不同$\gamma$值上测试算法性能</li>
+            <li><strong>自适应调整</strong>：根据学习进度动态调整$\gamma$值</li>
+            <li><strong>多目标优化</strong>：同时优化多个评价指标</li>
+        </ul>
+        
+        <h2>7. 局限性与改进方向</h2>
+        
+        <h3>7.1 固定折扣的局限</h3>
+        <ul>
+            <li><strong>任务适应性差</strong>：单一$\gamma$值不适用于复杂环境</li>
+            <li><strong>长期规划不足</strong>：可能忽视重要的长期后果</li>
+            <li><strong>短期行为偏见</strong>：过度关注立即奖励</li>
+        </ul>
+        
+        <h3>7.2 变折扣因子方法</h3>
+        <ul>
+            <li><strong>时间依赖折扣</strong>：$\gamma(t)$随时间变化的折扣策略</li>
+            <li><strong>状态依赖折扣</strong>：$\gamma(s)$根据状态调整的智能折扣</li>
+            <li><strong>目标导向折扣</strong>：基于任务目标的自适应折扣</li>
+        </ul>
+        
+        <p><strong>变折扣因子的数学表示：</strong></p>
+        <div class="formula">
+            <p>$G_t = \sum_{k=0}^{\infty} \left( \prod_{i=0}^{k-1} \gamma_{t+i} \right) R_{t+k}$</p>
+            <p>其中$\gamma_{t+i}$为时间步$t+i$的折扣因子</p>
+        </div>
+        
+        <div class="success-box">
+            <h4><i class="fas fa-check-circle"></i> 总结</h4>
+            <p>折扣因子是强化学习中的关键超参数，其核心作用是：</p>
+            <ol>
+                <li><strong>保证收敛</strong>：使无限时间序列的价值函数有界</li>
+                <li><strong>平衡短期与长期</strong>：权衡即时奖励和未来收益</li>
+                <li><strong>提供理论保证</strong>：确保算法的数学性质</li>
+                <li><strong>反映实际偏好</strong>：符合人类的时间偏好和不确定性</li>
+            </ol>
+        </div>
+        
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

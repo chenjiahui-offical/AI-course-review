@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第十节课作业：不完美信息博弈</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> 返回目录</a>
+        
+        <h1>第十节课作业：不完美信息下的博弈</h1>
+        
+        <h2>1. 问题定义</h2>
+        
+        <h3>1.1 不完美信息博弈的概念</h3>
+        
+        <p>不完美信息博弈（Imperfect Information Game）是指在博弈过程中，参与者无法完全了解其他参与者的信息或博弈的某些状态信息的博弈类型。这与完美信息博弈形成对比，后者中所有参与者都完全了解博弈的历史状态。</p>
+        
+        <div class="highlight-box">
+            <h4><i class="fas fa-lightbulb"></i> 核心特征</h4>
+            <ul>
+                <li><strong>信息不对称</strong>：不同参与者掌握的信息量不同</li>
+                <li><strong>隐藏信息</strong>：某些关键信息对部分参与者不可见</li>
+                <li><strong>不确定性</strong>：决策存在风险和概率因素</li>
+                <li><strong>策略依赖性</strong>：最优策略依赖于对未知信息的推理</li>
+            </ul>
+        </div>
+        
+        <h3>1.2 数学定义</h3>
+        
+        <p>在博弈论中，不完美信息博弈可以用扩展式博弈表示：</p>
+        
+        <div class="formula">
+            <p>$G = (N, A, H, Z, \rho, \sigma, u, I)$</p>
+            <p>其中 $I = \{I_1, I_2, ..., I_n\}$ 表示信息集分割</p>
+            <p>同一信息集中的决策节点无法被参与者区分</p>
+        </div>
+        
+        <h2>2. 经典例子</h2>
+        
+        <h3>2.1 扑克（Poker）</h3>
+        
+        <div class="info-box">
+            <h4><i class="fas fa-cards"></i> 问题描述</h4>
+            <ul>
+                <li>参与者知道自己的手牌，但不知道对手的手牌</li>
+                <li>需要通过下注模式和对手行为推断对手牌力</li>
+                <li>包含bluff（诈唬）和心理战术</li>
+            </ul>
+            
+            <h4>关键要素</h4>
+            <ul>
+                <li><strong>隐藏信息</strong>：对手的手牌</li>
+                <li><strong>不完全观测</strong>：对手的决策逻辑</li>
+                <li><strong>概率推理</strong>：基于已知信息计算胜率</li>
+            </ul>
+        </div>
+        
+        <h3>2.2 桥牌（Bridge）</h3>
+        
+        <div class="info-box">
+            <h4><i class="fas fa-bridge"></i> 问题描述</h4>
+            <ul>
+                <li>4人游戏中，搭档之间需要配合</li>
+                <li>只能看到自己的13张牌，需要通过叫牌传递信息</li>
+                <li>防守方需要推理庄家的牌型分布</li>
+            </ul>
+            
+            <h4>复杂性</h4>
+            <ul>
+                <li>信息传递的合法性限制</li>
+                <li>多层级的信息推理</li>
+                <li>团队合作中的信息共享</li>
+            </ul>
+        </div>
+        
+        <h3>2.3 军事博弈</h3>
+        
+        <div class="warning-box">
+            <h4><i class="fas fa-shield-alt"></i> 问题描述</h4>
+            <ul>
+                <li>战争中无法完全了解敌方部署</li>
+                <li>需要基于侦察和情报做出决策</li>
+                <li>包含欺骗和信息战</li>
+            </ul>
+            
+            <h4>应用场景</h4>
+            <ul>
+                <li>部署隐蔽和侦察</li>
+                <li>假目标设置</li>
+                <li>战略欺骗</li>
+            </ul>
+        </div>
+        
+        <h3>2.4 拍卖理论</h3>
+        
+        <div class="info-box">
+            <h4><i class="fas fa-gavel"></i> 第一价格密封拍卖</h4>
+            <ul>
+                <li>参与者不知道其他人的估值</li>
+                <li>需要猜测竞争对手的出价策略</li>
+                <li>最优策略依赖于对估值的分布假设</li>
+            </ul>
+        </div>
+        
+        <h2>3. 主流求解方法</h2>
+        
+        <h3>3.1 纳什均衡求解</h3>
+        
+        <h4>3.1.1 行为策略纳什均衡</h4>
+        
+        <p><strong>基本思路</strong>：</p>
+        <ul>
+            <li>在每个信息集上定义概率分布</li>
+            <li>寻找无人有激励偏离的稳定状态</li>
+            <li>支撑定理：Kuhn's theorem保证行为策略和混合策略的等价性</li>
+        </ul>
+        
+        <p><strong>求解方法</strong>：</p>
+        <ul>
+            <li><strong>Lemke-Howson算法</strong>：适用于双人博弈</li>
+            <li><strong>支撑枚举法</strong>：穷举所有可能的支撑集</li>
+            <li><strong>迭代最优响应</strong>：逐步逼近均衡点</li>
+        </ul>
+        
+        <h4>3.1.2 序贯均衡</h4>
+        
+        <p><strong>特点</strong>：</p>
+        <ul>
+            <li>在纳什均衡基础上增加一致性要求</li>
+            <li>考虑非均衡路径上的信念更新</li>
+            <li>适用于动态不完美信息博弈</li>
+        </ul>
+        
+        <h3>3.2 机器学习方法</h3>
+        
+        <h4>3.2.1 反向强化学习（Inverse RL）</h4>
+        
+        <div class="highlight-box">
+            <h4><i class="fas fa-lightbulb"></i> 核心思想</h4>
+            <ul>
+                <li>从专家策略中推断回报函数</li>
+                <li>学习潜在的信息结构和决策逻辑</li>
+                <li>适用于信息不完全的复杂环境</li>
+            </ul>
+            
+            <h4>算法步骤</h4>
+            <ol>
+                <li>收集专家决策数据</li>
+                <li>优化回报函数以解释专家行为</li>
+                <li>使用学习到的回报函数训练策略</li>
+            </ol>
+        </div>
+        
+        <h4>3.2.2 深度神经网络方法</h4>
+        
+        <p><strong>AlphaGo系列</strong>：</p>
+        <ul>
+            <li><strong>AlphaGo</strong>：结合蒙特卡洛树搜索和深度学习</li>
+            <li><strong>AlphaZero</strong>：自我对弈学习，无需人类数据</li>
+            <li><strong>AlphaStar</strong>：处理星际争霸等不完美信息游戏</li>
+        </ul>
+        
+        <p><strong>网络架构</strong>：</p>
+        <ul>
+            <li><strong>策略网络</strong>：输出动作概率分布</li>
+            <li><strong>价值网络</strong>：评估状态价值</li>
+            <li><strong>信念网络</strong>：表示对隐藏信息的概率估计</li>
+        </ul>
+        
+        <h3>3.3 近似算法</h3>
+        
+        <h4>3.3.1 蒙特卡洛方法</h4>
+        
+        <p><strong>基本原理</strong>：</p>
+        <ul>
+            <li>通过随机采样估计期望值</li>
+            <li>处理高维信息空间</li>
+            <li>适用于大规模博弈问题</li>
+        </ul>
+        
+        <p><strong>具体技术</strong>：</p>
+        <ul>
+            <li><strong>蒙特卡洛树搜索（MCTS）</strong>：平衡探索与利用</li>
+            <li><strong>重要性采样</strong>：提高采样效率</li>
+            <li><strong>分层采样</strong>：处理多层级不确定性</li>
+        </ul>
+        
+        <h4>3.3.2 信息集抽象</h4>
+        
+        <p><strong>抽象方法</strong>：</p>
+        <ul>
+            <li><strong>机会节点抽象</strong>：合并概率相似的随机事件</li>
+            <li><strong>历史启发抽象</strong>：基于博弈历史进行聚类</li>
+            <li><strong>Lossless抽象</strong>：保证不丢失均衡解</li>
+        </ul>
+        
+        <h3>3.4 演化博弈方法</h3>
+        
+        <h4>3.4.1 遗传算法</h4>
+        
+        <p><strong>应用思路</strong>：</p>
+        <ul>
+            <li>将策略编码为基因型</li>
+            <li>通过选择、交叉、变异进化策略</li>
+            <li>适应度函数基于策略对战表现</li>
+        </ul>
+        
+        <p><strong>优势</strong>：</p>
+        <ul>
+            <li>处理复杂策略空间</li>
+            <li>避免局部最优</li>
+            <li>适用于多目标优化</li>
+        </ul>
+        
+        <h4>3.4.2 粒子群优化</h4>
+        
+        <p><strong>特点</strong>：</p>
+        <ul>
+            <li>模拟群体智能行为</li>
+            <li>个体学习和群体学习相结合</li>
+            <li>收敛速度快，参数调节简单</li>
+        </ul>
+        
+        <h3>3.5 在线学习方法</h3>
+        
+        <h4>3.5.1 虚拟对弈（Fictitious Play）</h4>
+        
+        <p><strong>算法描述</strong>：</p>
+        <ul>
+            <li>维护对手策略的经验分布</li>
+            <li>每轮对经验分布做出最佳响应</li>
+            <li>理论上收敛到纳什均衡</li>
+        </ul>
+        
+        <p><strong>改进版本</strong>：</p>
+        <ul>
+            <li><strong>平滑虚拟对弈</strong>：避免循环震荡</li>
+            <li><strong>加权虚拟对弈</strong>：给近期策略更高权重</li>
+        </ul>
+        
+        <h4>3.5.2 遗憾最小化（Regret Minimization）</h4>
+        
+        <div class="highlight-box">
+            <h4><i class="fas fa-lightbulb"></i> 核心概念</h4>
+            <ul>
+                <li><strong>遗憾值</strong>：实际收益与最佳可能收益的差距</li>
+                <li><strong>累积遗憾</strong>：历史遗憾的总和</li>
+                <li><strong>遗憾匹配</strong>：根据遗憾值调整策略概率</li>
+            </ul>
+        </div>
+        
+        <p><strong>算法实现</strong>：</p>
+        <pre><code class="language-python">对于每个信息集i和动作a：
+    累积遗憾[i][a] += 实际收益 - 最佳响应收益
+    策略[i][a] = max(累积遗憾[i][a], 0) / Σ累积遗憾[i]</code></pre>
+        
+        <h3>3.6 贝叶斯方法</h3>
+        
+        <h4>3.6.1 贝叶斯博弈</h4>
+        
+        <p><strong>建模框架</strong>：</p>
+        <ul>
+            <li>参与者类型：私有信息的抽象</li>
+            <li>类型分布：先验概率分布</li>
+            <li>策略函数：从类型到动作的映射</li>
+        </ul>
+        
+        <p><strong>求解思路</strong>：</p>
+        <ul>
+            <li>计算贝叶斯纳什均衡</li>
+            <li>使用粒子滤波处理后验信念</li>
+            <li>适用于信息结构明确的场景</li>
+        </ul>
+        
+        <h4>3.6.2 信念更新机制</h4>
+        
+        <p><strong>贝叶斯推断</strong>：</p>
+        <ul>
+            <li>根据观测到的行为更新信念</li>
+            <li>使用马尔可夫链蒙特卡洛（MCMC）</li>
+            <li>处理高维后验分布</li>
+        </ul>
+        
+        <h2>4. 前沿进展</h2>
+        
+        <h3>4.1 深度强化学习突破</h3>
+        
+        <div class="success-box">
+            <h4><i class="fas fa-check-circle"></i> 重大成果</h4>
+            <ul>
+                <li><strong>DeepStack</strong>：首个在Heads-up No-Limit Texas Hold'em中击败职业玩家的AI</li>
+                <li><strong>Libratus</strong>：在多轮德州扑克中击败顶尖职业选手</li>
+                <li><strong>Pluribus</strong>：在六人扑克中达到超人类水平</li>
+            </ul>
+        </div>
+        
+        <h3>4.2 理论发展</h3>
+        <ul>
+            <li><strong>粗相关均衡</strong>：弱化纳什均衡的要求</li>
+            <li><strong>在线凸优化</strong>：提供后悔边界保证</li>
+            <li><strong>分布式算法</strong>：解决大规模博弈的计算挑战</li>
+        </ul>
+        
+        <h3>4.3 应用拓展</h3>
+        <ul>
+            <li><strong>经济学</strong>：市场设计和机制设计</li>
+            <li><strong>网络安全</strong>：攻防博弈策略</li>
+            <li><strong>自动驾驶</strong>：多智能体决策</li>
+            <li><strong>医疗诊断</strong>：不确定信息下的决策支持</li>
+        </ul>
+        
+        <h2>5. 算法对比总结</h2>
+        
+        <table>
+            <tr>
+                <th>方法类别</th>
+                <th>代表算法</th>
+                <th>优点</th>
+                <th>缺点</th>
+                <th>适用场景</th>
+            </tr>
+            <tr>
+                <td><strong>纳什均衡</strong></td>
+                <td>Lemke-Howson</td>
+                <td>理论保证强</td>
+                <td>计算复杂度高</td>
+                <td>小规模博弈</td>
+            </tr>
+            <tr>
+                <td><strong>深度学习</strong></td>
+                <td>AlphaStar</td>
+                <td>处理复杂环境</td>
+                <td>需要大量数据</td>
+                <td>大规模游戏</td>
+            </tr>
+            <tr>
+                <td><strong>蒙特卡洛</strong></td>
+                <td>MCTS</td>
+                <td>无需模型</td>
+                <td>收敛慢</td>
+                <td>在线决策</td>
+            </tr>
+            <tr>
+                <td><strong>遗憾最小化</strong></td>
+                <td>CFR</td>
+                <td>收敛保证</td>
+                <td>内存消耗大</td>
+                <td>扑克类游戏</td>
+            </tr>
+            <tr>
+                <td><strong>贝叶斯方法</strong></td>
+                <td>贝叶斯博弈</td>
+                <td>处理不确定性</td>
+                <td>计算复杂</td>
+                <td>拍卖、谈判</td>
+            </tr>
+        </table>
+        
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

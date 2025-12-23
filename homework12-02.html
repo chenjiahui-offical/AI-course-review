@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>12.02课堂作业 - 残差连接</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="index.html" class="nav-brand">
+                <i class="fas fa-brain"></i>
+                高级人工智能课程复习
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content-card">
+            <div class="homework-header">
+                <h1><i class="fas fa-link"></i> 12.02课堂作业：残差连接</h1>
+                <div class="homework-meta">
+                    <span><i class="fas fa-calendar"></i> 2024年12月2日</span>
+                    <span><i class="fas fa-tag"></i> 深度学习架构</span>
+                </div>
+            </div>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-question-circle"></i> 作业题目</h2>
+                <div class="question-box">
+                    <p><strong>题目：</strong>详细阐述残差连接的定义、计算公式、主要作用和典型应用。</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-book"></i> 一、残差连接的定义</h2>
+                
+                <div class="definition-box">
+                    <p>残差连接（Residual Connection）是深度学习中一种重要的网络架构设计，最初由<strong>何恺明等人在2015年</strong>提出，主要用于解决深度神经网络的退化问题。</p>
+                    
+                    <div class="highlight-box">
+                        <h3><i class="fas fa-star"></i> 核心思想</h3>
+                        <p>通过引入跳跃连接（Skip Connection），让信息可以直接从前层传递到后层，而不必经过中间的非线性变换。这样网络可以学习残差映射，而不是直接学习目标映射。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-calculator"></i> 二、计算公式</h2>
+                
+                <h3>2.1 基本公式</h3>
+                <div class="formula-box">
+                    <p>残差连接的基本计算公式为：</p>
+                    <div class="katex-display">
+                        $$y = F(x, \{W_i\}) + x$$
+                    </div>
+                    <p>其中：</p>
+                    <ul>
+                        <li>\(x\) 是输入特征</li>
+                        <li>\(F(x, \{W_i\})\) 是残差函数，表示网络层需要学习的残差映射</li>
+                        <li>\(\{W_i\}\) 是网络层的权重参数</li>
+                        <li>\(y\) 是输出特征</li>
+                        <li>\(+\) 表示逐元素相加操作</li>
+                    </ul>
+                </div>
+
+                <h3>2.2 维度不匹配时的公式</h3>
+                <div class="formula-box">
+                    <p>当输入和输出的维度不匹配时，通常会使用投影矩阵 \(W_s\) 来调整维度：</p>
+                    <div class="katex-display">
+                        $$y = F(x, \{W_i\}) + W_s \cdot x$$
+                    </div>
+                    <p>其中 \(W_s\) 是一个线性投影矩阵，用于将输入 \(x\) 的维度调整到与 \(F(x)\) 相同。</p>
+                </div>
+
+                <h3>2.3 代码实现示例</h3>
+                <div class="code-box">
+                    <pre><code class="language-python">import torch
+import torch.nn as nn
+
+class ResidualBlock(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(ResidualBlock, self).__init__()
+        
+        # 残差函数 F(x)
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1)
+        self.bn2 = nn.BatchNorm2d(out_channels)
+        
+        # 投影矩阵（当维度不匹配时）
+        self.shortcut = nn.Sequential()
+        if in_channels != out_channels:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels, kernel_size=1),
+                nn.BatchNorm2d(out_channels)
+            )
+    
+    def forward(self, x):
+        # 残差函数 F(x)
+        residual = self.conv1(x)
+        residual = self.bn1(residual)
+        residual = self.relu(residual)
+        residual = self.conv2(residual)
+        residual = self.bn2(residual)
+        
+        # 跳跃连接
+        shortcut = self.shortcut(x)
+        
+        # 残差连接：y = F(x) + x
+        out = residual + shortcut
+        out = self.relu(out)
+        
+        return out</code></pre>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-tasks"></i> 三、主要作用</h2>
+                
+                <div class="role-grid">
+                    <div class="role-item">
+                        <i class="fas fa-arrow-down"></i>
+                        <h3>1. 缓解梯度消失问题</h3>
+                        <ul>
+                            <li>梯度可以直接通过跳跃连接传播，避免了梯度在多层传播过程中逐渐消失</li>
+                            <li>改善了深层网络的训练稳定性</li>
+                        </ul>
+                        <div class="explanation-box">
+                            <h4>数学解释</h4>
+                            <p>在反向传播时，梯度可以直接通过恒等映射传递：</p>
+                            <div class="katex-display">
+                                $$\frac{\partial y}{\partial x} = \frac{\partial F(x)}{\partial x} + 1$$
+                            </div>
+                            <p>即使 \(\frac{\partial F(x)}{\partial x}\) 很小，梯度仍然可以通过 \(+1\) 项传递。</p>
+                        </div>
+                    </div>
+
+                    <div class="role-item">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>2. 解决网络退化问题</h3>
+                        <ul>
+                            <li>在非常深的网络中，单纯增加层数可能导致性能下降（网络退化）</li>
+                            <li>残差连接允许网络学习恒等映射，当额外层不需要时可以近似跳过</li>
+                        </ul>
+                        <div class="explanation-box">
+                            <h4>理论基础</h4>
+                            <p>如果某一层不需要学习任何东西，残差函数 \(F(x)\) 可以学习为0，这样：</p>
+                            <div class="katex-display">
+                                $$y = F(x) + x = 0 + x = x$$
+                            </div>
+                            <p>网络可以轻松学习恒等映射，不会因为增加层数而性能下降。</p>
+                        </div>
+                    </div>
+
+                    <div class="role-item">
+                        <i class="fas fa-rocket"></i>
+                        <h3>3. 加速网络收敛</h3>
+                        <ul>
+                            <li>提供了更直接的梯度传播路径</li>
+                            <li>使得深层网络的训练更加高效</li>
+                            <li>减少了训练所需的迭代次数</li>
+                        </ul>
+                    </div>
+
+                    <div class="role-item">
+                        <i class="fas fa-brain"></i>
+                        <h3>4. 提高网络表达能力</h3>
+                        <ul>
+                            <li>允许网络同时学习残差映射和恒等映射</li>
+                            <li>增强了网络对复杂模式的建模能力</li>
+                            <li>使得网络可以更灵活地选择学习策略</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-project-diagram"></i> 四、典型应用</h2>
+                
+                <div class="application-grid">
+                    <div class="application-item">
+                        <i class="fas fa-layer-group"></i>
+                        <h3>ResNet系列网络</h3>
+                        <p>残差连接最著名的应用，包括：</p>
+                        <ul>
+                            <li><strong>ResNet-18</strong>：18层深度网络</li>
+                            <li><strong>ResNet-34</strong>：34层深度网络</li>
+                            <li><strong>ResNet-50</strong>：50层深度网络</li>
+                            <li><strong>ResNet-101</strong>：101层深度网络</li>
+                            <li><strong>ResNet-152</strong>：152层深度网络</li>
+                        </ul>
+                        <p class="note">ResNet-152在ImageNet上取得了突破性的成果，证明了残差连接的有效性。</p>
+                    </div>
+
+                    <div class="application-item">
+                        <i class="fas fa-language"></i>
+                        <h3>Transformer架构</h3>
+                        <p>在多头注意力层和前馈网络中广泛使用：</p>
+                        <div class="code-box">
+                            <pre><code class="language-python"># Transformer中的残差连接
+class TransformerBlock(nn.Module):
+    def forward(self, x):
+        # 多头注意力 + 残差连接
+        attn_output = self.attention(x)
+        x = x + attn_output  # 残差连接
+        x = self.norm1(x)
+        
+        # 前馈网络 + 残差连接
+        ffn_output = self.ffn(x)
+        x = x + ffn_output  # 残差连接
+        x = self.norm2(x)
+        
+        return x</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="application-item">
+                        <i class="fas fa-image"></i>
+                        <h3>计算机视觉</h3>
+                        <ul>
+                            <li><strong>目标检测</strong>：Faster R-CNN、YOLO等</li>
+                            <li><strong>图像分割</strong>：U-Net、DeepLab等</li>
+                            <li><strong>图像生成</strong>：StyleGAN、Diffusion Models等</li>
+                        </ul>
+                    </div>
+
+                    <div class="application-item">
+                        <i class="fas fa-comments"></i>
+                        <h3>自然语言处理</h3>
+                        <ul>
+                            <li><strong>BERT</strong>：预训练语言模型</li>
+                            <li><strong>GPT系列</strong>：生成式预训练模型</li>
+                            <li><strong>T5</strong>：文本到文本转换模型</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-lightbulb"></i> 五、为什么残差连接有效？</h2>
+                
+                <div class="insight-box">
+                    <h3>1. 优化角度</h3>
+                    <p>残差连接将学习目标从学习完整映射 \(H(x)\) 改为学习残差 \(F(x) = H(x) - x\)。通常学习残差比学习完整映射更容易，因为残差往往接近于0。</p>
+
+                    <h3>2. 梯度流动角度</h3>
+                    <p>残差连接提供了一条"高速公路"，让梯度可以直接流向前层，避免了梯度消失问题。</p>
+
+                    <h3>3. 集成学习角度</h3>
+                    <p>残差网络可以看作是多个浅层网络的集成。每个残差块都提供了一条可选的路径，网络可以选择使用或跳过某些层。</p>
+
+                    <h3>4. 信息保留角度</h3>
+                    <p>跳跃连接确保了输入信息不会在深层网络中完全丢失，保留了原始特征的信息。</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-check-double"></i> 总结</h2>
+                
+                <div class="summary-box">
+                    <p>残差连接已成为深度学习中<strong>最重要和广泛使用的技术之一</strong>，是构建深层网络架构的核心组件。它通过简单而优雅的设计，解决了深度神经网络训练中的关键问题，使得训练数百层甚至上千层的网络成为可能。</p>
+                    
+                    <div class="key-takeaways">
+                        <h3>关键要点</h3>
+                        <ul>
+                            <li>残差连接通过跳跃连接让信息直接传递</li>
+                            <li>有效缓解梯度消失和网络退化问题</li>
+                            <li>加速网络收敛，提高训练效率</li>
+                            <li>广泛应用于ResNet、Transformer等现代架构</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <div class="navigation-buttons">
+                <a href="homework11-27.html" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 上一个作业
+                </a>
+                <a href="index.html" class="btn-primary">
+                    <i class="fas fa-home"></i> 返回主页
+                </a>
+                <a href="homework12-04.html" class="btn-secondary">
+                    下一个作业 <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>高级人工智能课程复习网站 © 2024</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

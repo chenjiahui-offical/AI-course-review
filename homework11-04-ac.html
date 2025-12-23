@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11.04课后作业 - Actor-Critic算法改进</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="index.html" class="nav-brand">
+                <i class="fas fa-brain"></i>
+                高级人工智能课程复习
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content-card">
+            <div class="homework-header">
+                <h1><i class="fas fa-theater-masks"></i> 11.04课后作业：Actor-Critic算法改进</h1>
+                <div class="homework-meta">
+                    <span><i class="fas fa-calendar"></i> 2024年11月4日</span>
+                    <span><i class="fas fa-tag"></i> 强化学习</span>
+                </div>
+            </div>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-question-circle"></i> 作业题目</h2>
+                <div class="question-box">
+                    <p><strong>题目：</strong>分析Actor-Critic算法的4种重要改进：A2C/A3C、DDPG、SAC和PPO，比较它们的改进动机、算法原理、优缺点及适用场景。</p>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-project-diagram"></i> 1. A2C/A3C算法</h2>
+                
+                <h3>1.1 A3C (Asynchronous Advantage Actor-Critic)</h3>
+                <div class="algorithm-box">
+                    <h4>改进动机</h4>
+                    <ul>
+                        <li>解决传统AC算法训练不稳定的问题</li>
+                        <li>提高样本效率和训练速度</li>
+                        <li>避免样本间的相关性</li>
+                    </ul>
+
+                    <h4>算法原理</h4>
+                    <p>A3C使用多个并行的worker，每个worker独立地与环境交互并计算梯度：</p>
+                    <div class="katex-display">
+                        $$\nabla_\theta J(\theta) = \mathbb{E}_{s_t,a_t}\left[\nabla_\theta \log \pi_\theta(a_t|s_t) A(s_t,a_t)\right]$$
+                    </div>
+                    <p>其中优势函数：</p>
+                    <div class="katex-display">
+                        $$A(s_t,a_t) = Q(s_t,a_t) - V(s_t)$$
+                    </div>
+
+                    <h4>算法特点</h4>
+                    <ul>
+                        <li><strong>异步并行</strong>：多个worker同时训练，减少数据相关性</li>
+                        <li><strong>优势函数</strong>：使用优势函数减少方差</li>
+                        <li><strong>经验回放省略</strong>：直接使用on-policy数据</li>
+                    </ul>
+                </div>
+
+                <h3>1.2 A2C (Advantage Actor-Critic)</h3>
+                <div class="algorithm-box">
+                    <h4>改进动机</h4>
+                    <ul>
+                        <li>A3C的异步实现复杂，同步版本更易于实现</li>
+                        <li>在单机上获得与A3C相当的性能</li>
+                    </ul>
+
+                    <h4>算法特点</h4>
+                    <p>同步多个worker，定期更新全局网络。使用熵正则化项：</p>
+                    <div class="katex-display">
+                        $$H(\pi) = -\mathbb{E}_{a\sim\pi}[\log\pi(a|s)]$$
+                    </div>
+                    <p>损失函数：</p>
+                    <div class="katex-display">
+                        $$L = -\mathbb{E}[A(s,a)\log\pi(a|s)] + c_1L^{VF} + c_2H(\pi)$$
+                    </div>
+                </div>
+
+                <div class="pros-cons-grid">
+                    <div class="pros-box">
+                        <h4><i class="fas fa-check-circle"></i> 优点</h4>
+                        <ul>
+                            <li>训练稳定，收敛性好</li>
+                            <li>实现相对简单</li>
+                            <li>支持连续和离散动作空间</li>
+                        </ul>
+                    </div>
+                    <div class="cons-box">
+                        <h4><i class="fas fa-times-circle"></i> 缺点</h4>
+                        <ul>
+                            <li>仍然是on-policy算法，样本效率相对较低</li>
+                            <li>需要调参（优势函数计算、熵系数等）</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-robot"></i> 2. DDPG (Deep Deterministic Policy Gradient)</h2>
+                
+                <h3>2.1 算法原理</h3>
+                <div class="algorithm-box">
+                    <h4>改进动机</h4>
+                    <ul>
+                        <li>扩展AC算法到高维连续动作空间</li>
+                        <li>结合确定性策略梯度和DQN的成功经验</li>
+                    </ul>
+
+                    <h4>核心思想</h4>
+                    <p>DDPG使用确定性策略 \(\mu(s|\theta^\mu)\) 而非随机策略：</p>
+                    <div class="katex-display">
+                        $$\nabla_{\theta^\mu} J \approx \mathbb{E}_{s_t\sim\mathcal{D}}\left[\nabla_a Q(s,a|\theta^Q)|_{a=\mu(s_t|\theta^\mu)} \nabla_{\theta^\mu} \mu(s_t|\theta^\mu)\right]$$
+                    </div>
+
+                    <h4>算法特点</h4>
+                    <ol>
+                        <li><strong>Actor网络</strong>：输出确定性动作 \(\mu(s|\theta^\mu)\)</li>
+                        <li><strong>Critic网络</strong>：评估Q值 \(Q(s,a|\theta^Q)\)</li>
+                        <li><strong>目标网络</strong>：稳定训练，软更新：\(\theta' \leftarrow \tau\theta + (1-\tau)\theta'\)</li>
+                        <li><strong>经验回放</strong>：提高样本效率</li>
+                    </ol>
+                </div>
+
+                <h3>2.2 算法流程</h3>
+                <div class="info-box">
+                    <ol>
+                        <li>从经验回放池采样 \((s_i, a_i, r_i, s_{i+1})\)</li>
+                        <li>计算目标值：\(y_i = r_i + \gamma Q'(s_{i+1}, \mu'(s_{i+1}|\theta^{\mu'})|\theta^{Q'})\)</li>
+                        <li>更新Critic：最小化 \(L = \frac{1}{N}\sum_i(y_i - Q(s_i,a_i|\theta^Q))^2\)</li>
+                        <li>更新Actor：\(\nabla_{\theta^\mu}J \approx \frac{1}{N}\sum_i \nabla_a Q(s,a|\theta^Q)|_{s=s_i,a=\mu(s_i)} \nabla_{\theta^\mu}\mu(s_i|\theta^\mu)\)</li>
+                    </ol>
+                </div>
+
+                <div class="pros-cons-grid">
+                    <div class="pros-box">
+                        <h4><i class="fas fa-check-circle"></i> 优点</h4>
+                        <ul>
+                            <li>适用于高维连续动作空间</li>
+                            <li>样本效率高（off-policy + 经验回放）</li>
+                            <li>训练相对稳定</li>
+                        </ul>
+                    </div>
+                    <div class="cons-box">
+                        <h4><i class="fas fa-times-circle"></i> 缺点</h4>
+                        <ul>
+                            <li>对超参数敏感</li>
+                            <li>容易陷入局部最优</li>
+                            <li>探索不足（确定性策略）</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-fire"></i> 3. SAC (Soft Actor-Critic)</h2>
+                
+                <h3>3.1 算法原理</h3>
+                <div class="algorithm-box">
+                    <h4>改进动机</h4>
+                    <ul>
+                        <li>解决DDPG探索不足的问题</li>
+                        <li>提高训练稳定性和样本效率</li>
+                        <li>引入最大熵框架</li>
+                    </ul>
+
+                    <h4>核心思想</h4>
+                    <p>SAC基于最大熵强化学习，目标函数为：</p>
+                    <div class="katex-display">
+                        $$J(\pi) = \sum_{t=0}^T \mathbb{E}_{(s_t,a_t)\sim\rho_\pi}[r(s_t,a_t) + \alpha H(\pi(\cdot|s_t))]$$
+                    </div>
+                    <p>其中熵项：</p>
+                    <div class="katex-display">
+                        $$H(\pi(\cdot|s_t)) = \mathbb{E}_{a_t\sim\pi(\cdot|s_t)}[-\log\pi(a_t|s_t)]$$
+                    </div>
+                </div>
+
+                <h3>3.2 关键技术</h3>
+                <div class="technique-grid">
+                    <div class="technique-item">
+                        <h4>1. 重参数化技巧</h4>
+                        <div class="katex-display">
+                            $$a_t = f_\theta(\epsilon_t; s_t), \quad \epsilon_t \sim \mathcal{N}(0,1)$$
+                        </div>
+                    </div>
+                    <div class="technique-item">
+                        <h4>2. 自适应温度参数</h4>
+                        <p>通过梯度下降调整温度参数 \(\alpha\)：</p>
+                        <div class="katex-display">
+                            $$\alpha^* = \arg\min_\alpha \mathbb{E}_{a_t\sim\pi_t}[-\alpha\log\pi_t(a_t|s_t) - \alpha\bar{H}]$$
+                        </div>
+                    </div>
+                    <div class="technique-item">
+                        <h4>3. 两个Q函数</h4>
+                        <p>使用两个独立的Q函数，取最小值来避免过高估计：</p>
+                        <div class="katex-display">
+                            $$Q(s,a) = \min(Q_1(s,a), Q_2(s,a))$$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pros-cons-grid">
+                    <div class="pros-box">
+                        <h4><i class="fas fa-check-circle"></i> 优点</h4>
+                        <ul>
+                            <li>样本效率极高</li>
+                            <li>训练稳定，鲁棒性强</li>
+                            <li>自动平衡探索与利用</li>
+                            <li>性能优异，适用于复杂任务</li>
+                        </ul>
+                    </div>
+                    <div class="cons-box">
+                        <h4><i class="fas fa-times-circle"></i> 缺点</h4>
+                        <ul>
+                            <li>计算复杂度较高（两个Q网络）</li>
+                            <li>需要调参（温度参数、重参数化等）</li>
+                            <li>理论相对复杂</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-chart-line"></i> 4. PPO (Proximal Policy Optimization)</h2>
+                
+                <h3>4.1 算法原理</h3>
+                <div class="algorithm-box">
+                    <h4>改进动机</h4>
+                    <ul>
+                        <li>解决传统策略梯度算法步长难以控制的问题</li>
+                        <li>提高训练稳定性和样本效率</li>
+                        <li>实现简单，易于调参</li>
+                    </ul>
+
+                    <h4>核心思想</h4>
+                    <p>PPO使用裁剪的目标函数限制策略更新幅度：</p>
+                    <div class="katex-display">
+                        $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t\left[\min\left(r_t(\theta)\hat{A}_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t\right)\right]$$
+                    </div>
+                    <p>其中重要性采样比率：</p>
+                    <div class="katex-display">
+                        $$r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}$$
+                    </div>
+                </div>
+
+                <h3>4.2 PPO变种</h3>
+                <div class="variant-grid">
+                    <div class="variant-item">
+                        <h4>PPO-Penalty</h4>
+                        <p>使用KL散度惩罚项：</p>
+                        <div class="katex-display">
+                            $$L^{KLPEN}(\theta) = \hat{\mathbb{E}}_t\left[\frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}\hat{A}_t - \beta \cdot KL\right]$$
+                        </div>
+                    </div>
+                    <div class="variant-item">
+                        <h4>PPO-Clip</h4>
+                        <p>使用裁剪机制，更简单有效</p>
+                    </div>
+                </div>
+
+                <h3>4.3 算法特点</h3>
+                <div class="info-box">
+                    <ul>
+                        <li><strong>信任区域约束</strong>：通过裁剪或KL惩罚限制策略更新幅度</li>
+                        <li><strong>优势函数标准化</strong>：\(\hat{A}_t \leftarrow \frac{\hat{A}_t - \mu(\hat{A})}{\sigma(\hat{A})}\)</li>
+                        <li><strong>多epoch更新</strong>：同一批次数据多次更新，提高样本效率</li>
+                    </ul>
+                </div>
+
+                <div class="pros-cons-grid">
+                    <div class="pros-box">
+                        <h4><i class="fas fa-check-circle"></i> 优点</h4>
+                        <ul>
+                            <li>实现简单，易于调参</li>
+                            <li>训练稳定，收敛性好</li>
+                            <li>样本效率适中</li>
+                            <li>适用于各种任务</li>
+                        </ul>
+                    </div>
+                    <div class="cons-box">
+                        <h4><i class="fas fa-times-circle"></i> 缺点</h4>
+                        <ul>
+                            <li>仍然是on-policy算法</li>
+                            <li>需要仔细选择裁剪参数</li>
+                            <li>性能可能略逊于SAC等最新算法</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-balance-scale"></i> 5. 算法对比分析</h2>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>算法</th>
+                                <th>策略类型</th>
+                                <th>数据使用</th>
+                                <th>核心改进</th>
+                                <th>样本效率</th>
+                                <th>训练稳定性</th>
+                                <th>适用场景</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>A2C/A3C</strong></td>
+                                <td>随机策略</td>
+                                <td>On-policy</td>
+                                <td>并行训练+优势函数</td>
+                                <td>中等</td>
+                                <td>较好</td>
+                                <td>离散/连续动作</td>
+                            </tr>
+                            <tr>
+                                <td><strong>DDPG</strong></td>
+                                <td>确定性策略</td>
+                                <td>Off-policy</td>
+                                <td>确定性策略+目标网络</td>
+                                <td>高</td>
+                                <td>中等</td>
+                                <td>连续高维动作</td>
+                            </tr>
+                            <tr>
+                                <td><strong>SAC</strong></td>
+                                <td>随机策略</td>
+                                <td>Off-policy</td>
+                                <td>最大熵+重参数化</td>
+                                <td>极高</td>
+                                <td>极好</td>
+                                <td>连续动作</td>
+                            </tr>
+                            <tr>
+                                <td><strong>PPO</strong></td>
+                                <td>随机策略</td>
+                                <td>On-policy</td>
+                                <td>裁剪目标函数</td>
+                                <td>中等</td>
+                                <td>极好</td>
+                                <td>离散/连续动作</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>详细差异分析</h3>
+                
+                <h4>1. 算法做法差异</h4>
+                <div class="comparison-grid">
+                    <div class="comparison-item">
+                        <h5><i class="fas fa-network-wired"></i> 并行化策略</h5>
+                        <ul>
+                            <li><strong>A3C</strong>：异步并行多个worker</li>
+                            <li><strong>A2C</strong>：同步并行多个worker</li>
+                            <li><strong>DDPG/SAC</strong>：单智能体+经验回放</li>
+                            <li><strong>PPO</strong>：单智能体或多智能体，但同步更新</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-item">
+                        <h5><i class="fas fa-random"></i> 策略表示</h5>
+                        <ul>
+                            <li><strong>A2C/A3C</strong>：随机策略 \(\pi(a|s)\)</li>
+                            <li><strong>DDPG</strong>：确定性策略 \(\mu(s)\)</li>
+                            <li><strong>SAC</strong>：随机策略（重参数化）</li>
+                            <li><strong>PPO</strong>：随机策略</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-item">
+                        <h5><i class="fas fa-chart-area"></i> 优势估计</h5>
+                        <ul>
+                            <li><strong>A2C/A3C</strong>：TD误差优势 \(A = Q - V\)</li>
+                            <li><strong>DDPG</strong>：直接使用Q值</li>
+                            <li><strong>SAC</strong>：使用最小双Q值</li>
+                            <li><strong>PPO</strong>：GAE优势估计</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h4>2. 改进动机差异</h4>
+                <div class="motivation-grid">
+                    <div class="motivation-item">
+                        <strong>A2C/A3C：</strong> 解决训练不稳定和样本相关性
+                    </div>
+                    <div class="motivation-item">
+                        <strong>DDPG：</strong> 扩展到连续高维动作空间
+                    </div>
+                    <div class="motivation-item">
+                        <strong>SAC：</strong> 提高探索能力和训练稳定性
+                    </div>
+                    <div class="motivation-item">
+                        <strong>PPO：</strong> 简化训练过程，提高稳定性
+                    </div>
+                </div>
+
+                <h4>3. 优缺点对比</h4>
+                <div class="ranking-box">
+                    <div class="ranking-item">
+                        <strong>样本效率排名：</strong> SAC > DDPG > A2C/A3C ≈ PPO
+                    </div>
+                    <div class="ranking-item">
+                        <strong>训练稳定性排名：</strong> PPO ≈ SAC > A2C/A3C > DDPG
+                    </div>
+                    <div class="ranking-item">
+                        <strong>实现复杂度排名：</strong> DDPG ≈ A2C > PPO > SAC
+                    </div>
+                    <div class="ranking-item">
+                        <strong>适用性排名：</strong> PPO > A2C/A3C > SAC > DDPG
+                    </div>
+                </div>
+            </section>
+
+            <div class="navigation-buttons">
+                <a href="homework11-04-td.html" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 上一个作业
+                </a>
+                <a href="index.html" class="btn-primary">
+                    <i class="fas fa-home"></i> 返回主页
+                </a>
+                <a href="homework11-06-dqn.html" class="btn-secondary">
+                    下一个作业 <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>高级人工智能课程复习网站 © 2024</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

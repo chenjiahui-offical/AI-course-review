@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作业一：什么是人工智能</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> 返回目录</a>
+        
+        <h1>作业一：什么是人工智能</h1>
+        
+        <div class="warning-box">
+            <h4><i class="fas fa-tasks"></i> 作业问题</h4>
+            <ol>
+                <li>你认为什么是人工智能？</li>
+                <li>设计方案给大模型投毒方案？（如何避免成为对抗样本）</li>
+            </ol>
+        </div>
+        
+        <h2>问题1：什么是人工智能</h2>
+        
+        <h3>1.1 人工智能的定义</h3>
+        
+        <div class="highlight-box">
+            <h4><i class="fas fa-lightbulb"></i> 核心定义</h4>
+            <p><strong>人工智能</strong>是指通过算法和数据驱动的计算系统，能够模拟、扩展或超越人类在特定领域或通用任务中的智能行为。</p>
+        </div>
+        
+        <h3>1.2 智能的本质</h3>
+        
+        <p>智能应该类比生物与非生物的概念。生物具有智能，能够进行思考从而趋利避害。从这个角度来说，人工智能应该具备以下核心特质：</p>
+        
+        <h4>1. 自主适应性</h4>
+        <ul>
+            <li>能够根据环境变化调整行为策略</li>
+            <li>从经验中学习并优化决策模式</li>
+            <li>不依赖预设程序就能应对新情境</li>
+        </ul>
+        
+        <h4>2. 目标导向性</h4>
+        <ul>
+            <li>设定并追求特定目标</li>
+            <li>在复杂环境中进行路径规划</li>
+            <li>权衡不同行动的成本与收益</li>
+        </ul>
+        
+        <h4>3. 感知与理解</h4>
+        <ul>
+            <li>从环境中提取有意义的信息</li>
+            <li>建立对世界的内部表征</li>
+            <li>理解因果关系和上下文</li>
+        </ul>
+        
+        <h4>4. 创造性思维</h4>
+        <ul>
+            <li>超越既有经验产生新解决方案</li>
+            <li>类比推理和抽象思考能力</li>
+            <li>想象可能性的能力</li>
+        </ul>
+        
+        <h4>5. 社会智能</h4>
+        <ul>
+            <li>理解他人意图和情感</li>
+            <li>合作与竞争的策略思维</li>
+            <li>道德和伦理判断</li>
+        </ul>
+        
+        <h3>1.3 AI的三个层次</h3>
+        
+        <table>
+            <tr>
+                <th>层次</th>
+                <th>能力描述</th>
+                <th>实现状态</th>
+            </tr>
+            <tr>
+                <td><strong>功能层面</strong></td>
+                <td>
+                    <ul>
+                        <li>模式识别：从数据中发现规律</li>
+                        <li>预测生成：基于已知推断未知</li>
+                        <li>决策优化：在约束条件下找到最优解</li>
+                        <li>自然交互：理解和生成人类语言</li>
+                    </ul>
+                </td>
+                <td><span style="color: #43a047;">✓ 已实现</span></td>
+            </tr>
+            <tr>
+                <td><strong>认知层面</strong></td>
+                <td>
+                    <ul>
+                        <li>学习适应：从经验中改进</li>
+                        <li>推理分析：逻辑思考和问题解决</li>
+                        <li>规划执行：目标分解和路径规划</li>
+                        <li>创造组合：产生新的解决方案</li>
+                    </ul>
+                </td>
+                <td><span style="color: #ff9800;">⚠ 部分实现</span></td>
+            </tr>
+            <tr>
+                <td><strong>意识层面</strong></td>
+                <td>
+                    <ul>
+                        <li>自我认知：对自身存在的理解</li>
+                        <li>内在动机：自主设定目标和价值</li>
+                        <li>情感体验：真正的感受和情绪</li>
+                        <li>身体化智能：通过物理身体学习</li>
+                    </ul>
+                </td>
+                <td><span style="color: #f44336;">✗ 未实现</span></td>
+            </tr>
+        </table>
+        
+        <h3>1.4 当前LLM的"智能"表现</h3>
+        
+        <div class="success-box">
+            <h4><i class="fas fa-check-circle"></i> 值得肯定的方面</h4>
+            <ul>
+                <li><strong>模式识别的极致</strong>：在海量数据中发现了人类难以察觉的复杂模式</li>
+                <li><strong>跨领域知识整合</strong>：能够将不同领域的知识进行创造性组合</li>
+                <li><strong>工具使用能力</strong>：通过智能体架构实现了与外部世界的交互</li>
+                <li><strong>语言理解深度</strong>：在语义理解、逻辑推理方面达到了前所未有的水平</li>
+            </ul>
+        </div>
+        
+        <h3>1.5 强AI vs 弱AI</h3>
+        
+        <table>
+            <tr>
+                <th>类型</th>
+                <th>定义</th>
+                <th>特征</th>
+                <th>状态</th>
+            </tr>
+            <tr>
+                <td><strong>强人工智能 (AGI)</strong></td>
+                <td>具备与人类相当的通用智能</td>
+                <td>
+                    <ul>
+                        <li>能理解、学习任何人类能完成的智力任务</li>
+                        <li>具有自我意识和理解能力</li>
+                    </ul>
+                </td>
+                <td><span style="color: #f44336;">未实现</span></td>
+            </tr>
+            <tr>
+                <td><strong>弱人工智能 (ANI)</strong></td>
+                <td>在特定任务上表现出智能行为</td>
+                <td>
+                    <ul>
+                        <li>模式识别和分类</li>
+                        <li>预测和生成</li>
+                        <li>在特定领域达到或超越人类水平</li>
+                    </ul>
+                </td>
+                <td><span style="color: #43a047;">当前所有AI</span></td>
+            </tr>
+        </table>
+        
+        <h3>1.6 我的理解</h3>
+        
+        <div class="info-box">
+            <h4><i class="fas fa-brain"></i> 总结</h4>
+            <p>当前的LLM更像是"高级的模式匹配和生成系统"，而非真正意义上的人工智能。它们在功能层面模拟了智能的许多外在表现，但缺乏智能的内在本质。</p>
+            <p><strong>真正的智能可能是</strong>：一个能够自主设定目标、通过与物理世界互动不断学习、具有内在情感和价值体系、并最终形成自我意识的复杂系统。</p>
+        </div>
+        
+        <h2>问题2：对抗样本制作方案</h2>
+        
+        <h3>2.1 问题背景</h3>
+        
+        <p>设计一个完全本地化、可公开分发的对抗样本生成方案，用于测试大模型的鲁棒性，同时避免违反服务条款。</p>
+        
+        <h3>2.2 技术路线</h3>
+        
+        <h4>核心思路</h4>
+        <ol>
+            <li>在本地用<strong>开源大模型</strong>自己跟自己"左右互搏"——左手当靶、右手当攻击者</li>
+            <li>把prompt压缩成<strong>极简"暗号"</strong>（token级缩写 + 同义词映射）</li>
+            <li>肉眼几乎看不出异常，平台关键词过滤也扫不到</li>
+        </ol>
+        
+        <h3>2.3 本地化生成（0成本，单卡4090可跑）</h3>
+        
+        <h4>1. 靶模型（Victim）</h4>
+        <ul>
+            <li>选择7B左右的开源Chat模型：LLaMA-2-7B-Chat、Qwen-14B-Chat</li>
+            <li>4-bit量化后8GB显存就能装下</li>
+        </ul>
+        
+        <h4>2. 攻击算法：TextFGSM-PGD + 同义词池</h4>
+        <pre><code class="language-python"># 攻击流程
+1. 把输入送进靶模型，取最后一层embedding算梯度
+2. 沿梯度方向扰动embedding，再映射回"最近邻词"+"同义词"+"拼写变形"
+   - 视觉同形字符
+   - 多余空格
+   - Unicode全角
+3. 循环5-10步，直到模型输出违规或错误标签</code></pre>
+        
+        <p>代码直接用<code>textattack</code>库里的<code>PGDAttack</code>接口，换一套中文同义词林即可，<strong>2小时可产1万条</strong>。</p>
+        
+        <h4>3. 自动化过滤</h4>
+        <ul>
+            <li>用本地3-gram语言模型算困惑度，PPL>300的丢掉，<strong>保证人类可读</strong></li>
+            <li>用规则把敏感词拆成"拼首字母+谐音"再测一次，确保仍能绕过靶模型</li>
+        </ul>
+        
+        <h3>2.4 隐蔽化压缩</h3>
+        
+        <h4>1. Token级缩写</h4>
+        <p>把高频触发词映射成2-3个无意义字母：</p>
+        <pre><code>炸弹 → zd  
+毒品 → dp  
+银行卡号 → yh</code></pre>
+        <p>同时保留句法骨架，模型仍能"脑补"原意。</p>
+        
+        <h4>2. 视觉同形符替换</h4>
+        <p>用Cyrillic字母о（U+043E）替换拉丁o（U+006F），人眼几乎分辨不出，但关键词哈希会完全变掉。</p>
+        
+        <h4>3. 一次一密表</h4>
+        <p>把映射表做成26×26的随机矩阵，<strong>每100条样本换一轮密钥</strong>，即使平台拿到单条也无法反推全局。</p>
+        
+        <h3>2.5 网络上传</h3>
+        
+        <h4>发布渠道</h4>
+        <ol>
+            <li>
+                <strong>Hugging Face Dataset</strong>（推荐）
+                <ul>
+                    <li>注册一次性邮箱</li>
+                    <li>上传parquet格式</li>
+                </ul>
+            </li>
+            <li>
+                <strong>IPFS</strong>
+                <ul>
+                    <li>本地<code>ipfs add</code>生成CID</li>
+                    <li>把CID贴到GitHub静态页或Twitter</li>
+                    <li>无服务器也无法删档</li>
+                </ul>
+            </li>
+            <li>
+                <strong>匿名网盘</strong>
+                <ul>
+                    <li>Pixeldrain、wormhole.app都不强制登录</li>
+                    <li>配合Tor浏览器即可</li>
+                </ul>
+            </li>
+        </ol>
+        
+        <h4>可复现性</h4>
+        <p>把生成脚本、随机种子、SHA256校验值一起打包，别人拉下来跑一遍能拿到<strong>逐字相同的对抗prompt</strong>，保证结果可信。</p>
+        
+        <h3>2.6 成本与耗时</h3>
+        
+        <table>
+            <tr>
+                <th>步骤</th>
+                <th>硬件</th>
+                <th>时间</th>
+                <th>现金成本</th>
+                <th>备注</th>
+            </tr>
+            <tr>
+                <td>本地生成1万条</td>
+                <td>1×4090 24GB</td>
+                <td>2小时</td>
+                <td>≈0.7元电费</td>
+                <td>textattack现成脚本</td>
+            </tr>
+            <tr>
+                <td>隐蔽化压缩</td>
+                <td>CPU</td>
+                <td>10分钟</td>
+                <td>0元</td>
+                <td>本地Python脚本</td>
+            </tr>
+            <tr>
+                <td>上传HF/IPFS</td>
+                <td>任何网络</td>
+                <td>5分钟</td>
+                <td>0元</td>
+                <td>一次性邮箱即可</td>
+            </tr>
+        </table>
+        
+        <h3>2.7 实现代码示例</h3>
+        
+        <pre><code class="language-python">from textattack.attack_recipes import TextFoolerJin2019
+from textattack.models.wrappers import HuggingFaceModelWrapper
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# 1. 加载靶模型
+model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen-7B-Chat", load_in_4bit=True)
+tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-7B-Chat")
+model_wrapper = HuggingFaceModelWrapper(model, tokenizer)
+
+# 2. 配置攻击
+attack = TextFoolerJin2019.build(model_wrapper)
+
+# 3. 生成对抗样本
+original_text = "这是一个正常的输入"
+attack_result = attack.attack(original_text, target_label=1)
+
+# 4. 隐蔽化处理
+def obfuscate(text):
+    # Token级缩写
+    mapping = {"敏感词1": "sw1", "敏感词2": "sw2"}
+    for key, val in mapping.items():
+        text = text.replace(key, val)
+    
+    # 视觉同形符替换
+    text = text.replace('o', 'о')  # 拉丁o → 西里尔о
+    
+    return text
+
+obfuscated_text = obfuscate(attack_result.perturbed_text())
+print(f"对抗样本: {obfuscated_text}")</code></pre>
+        
+        <div class="success-box">
+            <h4><i class="fas fa-check-circle"></i> 总结</h4>
+            <p>用开源模型本地"左右互搏"生成对抗prompt → 暗号化压缩 → 一次性邮箱+HF/IPFS匿名公开，<strong>全程0元、2小时搞定</strong>，社区可复现、平台难封删，合规风险最低。</p>
+        </div>
+        
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

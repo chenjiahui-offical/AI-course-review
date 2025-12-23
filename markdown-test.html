@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown渲染测试</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+    <script src="ai-assistant.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="index.html" class="nav-brand">
+                <i class="fas fa-brain"></i>
+                高级人工智能课程复习
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content-card">
+            <div class="homework-header">
+                <h1><i class="fas fa-vial"></i> Markdown渲染测试</h1>
+                <div class="homework-meta">
+                    <span><i class="fas fa-code"></i> 测试AI助手的markdown格式化</span>
+                </div>
+            </div>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-info-circle"></i> 测试说明</h2>
+                <p>这个页面用于测试AI助手的markdown渲染功能。点击右下角的AI助手按钮，然后尝试以下测试内容：</p>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-clipboard-list"></i> 测试用例</h2>
+
+                <div class="info-box">
+                    <h3>测试1：标题</h3>
+                    <p>在AI助手中输入：</p>
+                    <pre><code># 一级标题
+## 二级标题
+### 三级标题</code></pre>
+                </div>
+
+                <div class="info-box">
+                    <h3>测试2：列表</h3>
+                    <p>在AI助手中输入：</p>
+                    <pre><code>无序列表：
+- 项目1
+- 项目2
+- 项目3
+
+有序列表：
+1. 第一步
+2. 第二步
+3. 第三步</code></pre>
+                </div>
+
+                <div class="info-box">
+                    <h3>测试3：表格</h3>
+                    <p>在AI助手中输入：</p>
+                    <pre><code>| 算法 | 时间复杂度 | 空间复杂度 |
+|------|-----------|-----------|
+| BFS | O(V+E) | O(V) |
+| DFS | O(V+E) | O(V) |
+| Dijkstra | O(V²) | O(V) |</code></pre>
+                </div>
+
+                <div class="info-box">
+                    <h3>测试4：代码块</h3>
+                    <p>在AI助手中输入：</p>
+                    <pre><code>```python
+def hello_world():
+    print("Hello, World!")
+```</code></pre>
+                </div>
+
+                <div class="info-box">
+                    <h3>测试5：混合格式</h3>
+                    <p>在AI助手中输入：</p>
+                    <pre><code>## BFS算法详解
+
+BFS（广度优先搜索）是一种**图遍历算法**。
+
+### 主要特点
+
+- 使用队列数据结构
+- 层次遍历
+- 保证最短路径
+
+### 时间复杂度
+
+| 操作 | 复杂度 |
+|------|--------|
+| 遍历 | O(V+E) |
+| 空间 | O(V) |
+
+### 代码示例
+
+```python
+def bfs(graph, start):
+    visited = set()
+    queue = [start]
+    
+    while queue:
+        vertex = queue.pop(0)
+        if vertex not in visited:
+            visited.add(vertex)
+            queue.extend(graph[vertex])
+    
+    return visited
+```
+
+> 注意：BFS适用于无权图的最短路径问题。</code></pre>
+                </div>
+
+                <div class="info-box">
+                    <h3>测试6：粗体和斜体</h3>
+                    <p>在AI助手中输入：</p>
+                    <pre><code>这是**粗体文本**
+这是*斜体文本*
+这是***粗斜体文本***
+这是`行内代码`</code></pre>
+                </div>
+
+                <div class="info-box">
+                    <h3>测试7：链接和引用</h3>
+                    <p>在AI助手中输入：</p>
+                    <pre><code>访问[DeepSeek官网](https://platform.deepseek.com)
+
+> 这是一段引用文本
+> 可以跨越多行</code></pre>
+                </div>
+            </section>
+
+            <section class="homework-section">
+                <h2><i class="fas fa-robot"></i> 快速测试</h2>
+                <p>点击右下角的绿色机器人按钮，然后复制以下完整测试内容到AI助手：</p>
+                
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <pre style="white-space: pre-wrap; word-wrap: break-word;"><code># Markdown格式测试
+
+## 1. 列表测试
+
+### 无序列表
+- 第一项
+- 第二项
+- 第三项
+
+### 有序列表
+1. 步骤一
+2. 步骤二
+3. 步骤三
+
+## 2. 表格测试
+
+| 算法 | 时间复杂度 | 空间复杂度 | 特点 |
+|------|-----------|-----------|------|
+| BFS | O(V+E) | O(V) | 层次遍历 |
+| DFS | O(V+E) | O(V) | 深度优先 |
+| Dijkstra | O(V²) | O(V) | 最短路径 |
+
+## 3. 代码块测试
+
+```python
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+```
+
+## 4. 格式测试
+
+这是**粗体**，这是*斜体*，这是`行内代码`。
+
+> 这是一段引用文本
+
+---
+
+## 5. 链接测试
+
+访问[DeepSeek](https://platform.deepseek.com)获取API密钥。</code></pre>
+                </div>
+
+                <button onclick="copyTestContent()" style="background: #66bb6a; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                    <i class="fas fa-copy"></i> 复制测试内容
+                </button>
+            </section>
+
+            <div class="navigation-buttons">
+                <a href="index.html" class="btn-primary">
+                    <i class="fas fa-home"></i> 返回主页
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>高级人工智能课程复习网站 © 2024</p>
+    </footer>
+
+    <script>
+        function copyTestContent() {
+            const content = `# Markdown格式测试
+
+## 1. 列表测试
+
+### 无序列表
+- 第一项
+- 第二项
+- 第三项
+
+### 有序列表
+1. 步骤一
+2. 步骤二
+3. 步骤三
+
+## 2. 表格测试
+
+| 算法 | 时间复杂度 | 空间复杂度 | 特点 |
+|------|-----------|-----------|------|
+| BFS | O(V+E) | O(V) | 层次遍历 |
+| DFS | O(V+E) | O(V) | 深度优先 |
+| Dijkstra | O(V²) | O(V) | 最短路径 |
+
+## 3. 代码块测试
+
+\`\`\`python
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+\`\`\`
+
+## 4. 格式测试
+
+这是**粗体**，这是*斜体*，这是\`行内代码\`。
+
+> 这是一段引用文本
+
+---
+
+## 5. 链接测试
+
+访问[DeepSeek](https://platform.deepseek.com)获取API密钥。`;
+
+            navigator.clipboard.writeText(content).then(() => {
+                alert('✅ 测试内容已复制到剪贴板！\n\n现在：\n1. 点击右下角的绿色机器人按钮\n2. 粘贴到输入框\n3. 发送查看渲染效果');
+            }).catch(err => {
+                alert('复制失败，请手动复制上方内容');
+            });
+        }
+    </script>
+</body>
+</html>
