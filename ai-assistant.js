@@ -395,11 +395,11 @@ ${context}
         // 3. 表格
         formatted = this.formatTable(formatted);
         
-        // 4. 标题（必须在新行开始）
-        formatted = formatted.replace(/^### (.*?)$/gm, '<h5>$1</h5>');
-        formatted = formatted.replace(/^### (.*?)$/gm, '<h4>$1</h4>');
-        formatted = formatted.replace(/^## (.*?)$/gm, '<h3>$1</h3>');
-        formatted = formatted.replace(/^# (.*?)$/gm, '<h2>$1</h2>');
+        // 4. 标题（必须在新行开始，从多到少处理避免误匹配）
+        formatted = formatted.replace(/^#### (.*?)$/gm, '<h4>$1</h4>');
+        formatted = formatted.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+        formatted = formatted.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+        formatted = formatted.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
         
         // 5. 粗体和斜体
         formatted = formatted.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
